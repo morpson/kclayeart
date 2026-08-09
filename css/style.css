@@ -1,0 +1,269 @@
+/* ============================================================
+   Katherine Claye Art — Portfolio
+   Design: ultra-minimal, artwork-first, eclectic frames
+   ============================================================ */
+
+/* ---------- Design Tokens ---------- */
+:root {
+  --bg: #fafafa;
+  --text: #111;
+  --text-muted: rgba(17,17,17,0.45);
+  --toggle-bg: #111;
+  --toggle-fg: #fafafa;
+  --frame-filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35)) contrast(1.05);
+  --frame-hover-filter: drop-shadow(0 18px 40px rgba(0,0,0,0.5)) contrast(1.08);
+
+  /* Single source of truth for all gaps — row gap and column padding are derived from this */
+  --gap: 60px;
+}
+
+[data-theme="dark"] {
+  --bg: #080808;
+  --text: #f0f0f0;
+  --text-muted: rgba(240,240,240,0.4);
+  --toggle-bg: #f0f0f0;
+  --toggle-fg: #080808;
+  --frame-filter: drop-shadow(0 8px 32px rgba(0,0,0,0.8))
+                  saturate(1.3) brightness(1.15) hue-rotate(5deg);
+  --frame-hover-filter: drop-shadow(0 20px 50px rgba(0,0,0,0.9))
+                        saturate(1.5) brightness(1.25) hue-rotate(5deg);
+}
+
+/* ---------- Reset & Base ---------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Playfair Display', 'Georgia', serif;
+  min-height: 100vh;
+  transition: background-color 0.6s ease, color 0.6s ease;
+  overflow-x: hidden;
+}
+
+/* ---------- Intro Overlay ---------- */
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: var(--bg);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  animation: intro-fade-out 0.7s ease 3.2s forwards;
+}
+
+.intro-text {
+  font-size: clamp(2rem, 6vw, 5rem);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.intro-text .letter {
+  display: inline-block;
+  opacity: 0;
+  animation: letter-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes letter-in {
+  from { opacity: 0; transform: translateY(30px); filter: blur(6px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0);   }
+}
+
+@keyframes intro-fade-out {
+  0%   { opacity: 1; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+/* ---------- Persistent site header ---------- */
+/* Hidden until intro finishes, then fades in */
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  pointer-events: none;     /* block clicks until visible */
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.site-header.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Artist name link (top-left) ── */
+.artist-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text);
+  opacity: 0.65;
+  transition: opacity 0.25s ease, color 0.6s ease;
+  white-space: nowrap;
+}
+
+.artist-name:hover {
+  opacity: 1;
+}
+
+/* ── Right side controls: sort + theme toggle ── */
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── Sort buttons ── */
+.sort-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.sort-btn {
+  background: none;
+  border: 1px solid var(--text-muted);
+  color: var(--text-muted);
+  border-radius: 6px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.2s ease,
+              color 0.2s ease,
+              background 0.2s ease;
+}
+
+.sort-btn:hover {
+  border-color: var(--text);
+  color: var(--text);
+}
+
+.sort-btn.active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+/* ── Theme toggle ── */
+.theme-toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: var(--toggle-bg);
+  color: var(--toggle-fg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+              box-shadow 0.3s ease,
+              background 0.6s ease,
+              color 0.6s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.15) rotate(20deg);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+}
+
+.icon-sun  { display: none; }
+.icon-moon { display: block; }
+[data-theme="dark"] .icon-sun  { display: block; }
+[data-theme="dark"] .icon-moon { display: none; }
+
+/* ---------- Gallery ---------- */
+.gallery {
+  position: relative;
+  /* top padding = header height + gap; sides and bottom = var(--gap) */
+  padding: calc(80px + var(--gap)) var(--gap) calc(var(--gap) * 2);
+  max-width: 1600px;
+  margin: 0 auto;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.gallery.visible {
+  opacity: 1;
+}
+
+/* ---------- Gallery Item ---------- */
+.art-link {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  text-decoration: none;
+  outline: none;
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+              width     0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gallery.resizing .art-link {
+  transition: none;
+}
+
+/* Frame + artwork wrapper */
+.art-frame-wrap {
+  position: relative;
+  display: block;
+  --bleed: 12%;
+  padding: var(--bleed);
+  will-change: transform;
+  transform: translateZ(0);
+  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.art-link:hover .art-frame-wrap {
+  transform: scale(1.04) translateY(-6px) rotateX(2deg);
+}
+
+.artwork {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.frame-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  filter: var(--frame-filter);
+  transition: filter 0.55s ease;
+}
+
+.art-link:hover .frame-overlay {
+  filter: var(--frame-hover-filter);
+}
+
+/* ---------- Accessibility ---------- */
+.art-link:focus-visible .art-frame-wrap {
+  outline: 2px solid var(--text);
+  outline-offset: 8px;
+  border-radius: 2px;
+}

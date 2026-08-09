@@ -1,0 +1,45 @@
+[build]
+  publish = "."
+  command = ""
+
+# Cache static assets aggressively
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Block direct access to source-only directories
+[[redirects]]
+  from = "/Frames/*"
+  to = "/404"
+  status = 404
+
+[[redirects]]
+  from = "/kclaye_art/*"
+  to = "/404"
+  status = 404
+
+[[redirects]]
+  from = "/data/*"
+  to = "/404"
+  status = 404
+
+[[redirects]]
+  from = "/venv/*"
+  to = "/404"
+  status = 404
+
+[[redirects]]
+  from = "/*.py"
+  to = "/404"
+  status = 404

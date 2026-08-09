@@ -1,0 +1,21 @@
+# Python environment
+venv/
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
+
+# Source-only (not needed in deploy)
+# These are excluded from git so Netlify never sees them.
+kclaye_art/
+data/
+/Frames/
+*.py
+1x1.png
+assets/frame.jpg
+assets/frame_transparent.png
