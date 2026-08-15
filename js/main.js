@@ -278,17 +278,31 @@
       artistWrap.classList.remove('hovered');
     });
 
-    // Touch / click toggle for mobile
-    artistWrap.addEventListener('click', (e) => {
+    // Touch / tap toggle for mobile
+    function toggleHover(e) {
       if (e.target.closest('.artist-nav__link')) return; // let nav links fire
+      if (e.stopPropagation) e.stopPropagation();
       artistWrap.classList.toggle('hovered');
-    });
+    }
 
+    artistWrap.addEventListener('click', toggleHover);
+    artistWrap.addEventListener('touchend', (e) => {
+      if (e.target.closest('.artist-nav__link')) return;
+      e.preventDefault();
+      toggleHover(e);
+    }, { passive: false });
+
+    // Dismiss when tapping outside
     document.addEventListener('click', (e) => {
       if (!artistWrap.contains(e.target)) {
         artistWrap.classList.remove('hovered');
       }
     });
+    document.addEventListener('touchstart', (e) => {
+      if (!artistWrap.contains(e.target)) {
+        artistWrap.classList.remove('hovered');
+      }
+    }, { passive: true });
   }
 
 })();
