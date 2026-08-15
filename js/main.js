@@ -36,7 +36,7 @@
   const gallery    = document.getElementById('gallery');
 
   // --- Touch-hint overlay -----------------------------------------------
-  // Show the touch-hint for ~3s after the intro finishes, then fade it out.
+  // Show the touch-hint for ~5.5s after the intro finishes, then fade it out.
   const touchHint = document.getElementById('touch-hint');
   if (touchHint) {
     // Appear as soon as the intro fades (~3.9s)
@@ -44,7 +44,7 @@
       touchHint.classList.add('visible');
     }, 3900);
 
-    // Fade out 3s later (6.9s total), then fully remove from paint
+    // Fade out 5.5s later (9.4s total), then fully remove from paint
     setTimeout(() => {
       touchHint.classList.remove('visible');
       touchHint.classList.add('fadeout');
@@ -52,7 +52,7 @@
       touchHint.addEventListener('transitionend', () => {
         touchHint.style.display = 'none';
       }, { once: true });
-    }, 6900);
+    }, 9400);
   }
 
   setTimeout(() => {

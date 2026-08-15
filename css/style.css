@@ -118,23 +118,42 @@ body {
   pointer-events: none;
   /* Hidden initially; JS adds .visible after intro, then .fadeout to dismiss */
   opacity: 0;
-  transition: opacity 0.6s ease;
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  background-color: rgba(250, 250, 250, 0);
+  transition: opacity 0.6s ease,
+              backdrop-filter 0.6s ease,
+              -webkit-backdrop-filter 0.6s ease,
+              background-color 0.6s ease;
 }
 
 .touch-hint.visible {
   opacity: 1;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background-color: rgba(250, 250, 250, 0.4);
+}
+
+[data-theme="dark"] .touch-hint.visible {
+  background-color: rgba(8, 8, 8, 0.5);
 }
 
 .touch-hint.fadeout {
   opacity: 0;
-  transition: opacity 0.8s ease;
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  background-color: rgba(250, 250, 250, 0);
+  transition: opacity 0.8s ease,
+              backdrop-filter 0.8s ease,
+              -webkit-backdrop-filter 0.8s ease,
+              background-color 0.8s ease;
 }
 
-/* Stage (320×320 container, matches Touch-frame.html dimensions) */
+/* Stage (220×220 scaled down container) */
 .touch-hint__stage {
   position: relative;
-  width: 320px;
-  height: 320px;
+  width: 220px;
+  height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -143,10 +162,10 @@ body {
 /* Ambient glow behind glass */
 .touch-hint__ambient-glow {
   position: absolute;
-  width: 150px;
-  height: 150px;
-  background: rgba(255,255,255,0.1);
-  filter: blur(40px);
+  width: 110px;
+  height: 110px;
+  background: rgba(255,255,255,0.12);
+  filter: blur(30px);
   border-radius: 50%;
   z-index: 0;
 }
@@ -154,16 +173,16 @@ body {
 /* Glassmorphic circle */
 .touch-hint__glass-circle {
   position: absolute;
-  width: 260px;
-  height: 260px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255,255,255,0.04);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
   box-shadow:
-    0 25px 50px rgba(0,0,0,0.5),
-    inset 0 1px 1px rgba(255,255,255,0.2);
+    0 20px 40px rgba(0,0,0,0.45),
+    inset 0 1px 1px rgba(255,255,255,0.25);
   z-index: 1;
   animation: touch-hint-pulse 6s ease-in-out infinite alternate;
 }
@@ -172,15 +191,15 @@ body {
   background: rgba(0,0,0,0.04);
   border-color: rgba(0,0,0,0.12);
   box-shadow:
-    0 25px 50px rgba(0,0,0,0.15),
+    0 20px 40px rgba(0,0,0,0.15),
     inset 0 1px 1px rgba(255,255,255,0.6);
 }
 
 /* Painting wrapper */
 .touch-hint__painting-wrapper {
   position: relative;
-  width: 150px;
-  height: 190px;
+  width: 105px;
+  height: 133px;
   transform-origin: 40% 70%;
   transform: rotate(-4deg);
   z-index: 2;
@@ -190,7 +209,7 @@ body {
 .touch-hint__ornate-svg {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8));
+  filter: drop-shadow(0 12px 20px rgba(0,0,0,0.75));
 }
 
 /* Tap ripple ring */
@@ -198,8 +217,8 @@ body {
   position: absolute;
   top: 60%;
   left: 65%;
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border: 1.5px solid #ffffff;
   border-radius: 50%;
   transform: translate(-50%, -50%) scale(0);
@@ -217,28 +236,24 @@ body {
   position: absolute;
   top: 58%;
   left: 62%;
-  width: 54px;
-  height: 64px;
+  width: 50px;
+  height: 50px;
   z-index: 5;
   transform-origin: top left;
   animation: touch-hint-hand 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-.touch-hint__cursor-hand svg {
+.touch-hint__hand-symbol {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.7));
-}
-
-[data-theme="light"] .touch-hint__cursor-hand svg g {
-  fill: #111;
-  stroke: rgba(255,255,255,0.4);
+  object-fit: contain;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.7));
 }
 
 /* Touch-hint keyframes */
 @keyframes touch-hint-hand {
   0%, 100% {
-    transform: translate(50px, 50px) rotate(15deg) scale(0.95);
+    transform: translate(35px, 35px) rotate(15deg) scale(0.95);
     opacity: 0.7;
   }
   38% {
@@ -252,7 +267,7 @@ body {
     transform: translate(0px, 0px) rotate(0deg) scale(1);
   }
   80% {
-    transform: translate(50px, 50px) rotate(15deg) scale(0.95);
+    transform: translate(35px, 35px) rotate(15deg) scale(0.95);
     opacity: 0.7;
   }
 }
@@ -305,12 +320,12 @@ body {
  *   The .site-header fades in at t=3.9s over 0.6s → fully visible at ~t=4.5s.
  *   The cycle animation has animation-delay: 4.5s.
  *
- * Idle / cycle (10s loop):
- *   Both labels are absolutely positioned at the SAME vertical spot.
- *   They take turns drifting and fading in (with a subtle blur).
+ * Idle / cycle (4.8s loop):
+ *   Both labels fade in and out from left to right with a reduced gap.
+ *   Contact appears first, then About follows immediately after.
  *
- * Hover / .hovered:
- *   Animation is paused. Both fade in, and CONTACT slides up to stack.
+ * Hover / .hovered (or mobile tap):
+ *   Both labels appear simultaneously stacked above the name.
  */
 
 .artist-name-wrap {
@@ -373,39 +388,38 @@ body {
   line-height: 1.3;
   opacity: 0;
   filter: blur(4px);
-  transform: translateY(4px);
-  /* Smoothly transition when hovered */
-  transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-              color 0.6s ease,
-              opacity 0.4s ease,
-              filter 0.4s ease,
-              transform 0.4s ease;
+  transform: translateX(-10px);
+  /* Smoothly transition when hovered or tapped */
+  transition: bottom 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.4s ease,
+              opacity 0.35s ease,
+              filter 0.35s ease,
+              transform 0.35s ease;
 }
 
 /* ── Idle cycle animation ────────────────────────────────────────── */
-.artist-nav__about {
-  animation: kc-cycle-about 10s cubic-bezier(0.4, 0, 0.2, 1) 4.5s infinite both;
-}
-
 .artist-nav__contact {
-  animation: kc-cycle-contact 10s cubic-bezier(0.4, 0, 0.2, 1) 4.5s infinite both;
+  animation: kc-cycle-contact 4.8s cubic-bezier(0.4, 0, 0.2, 1) 4.5s infinite both;
 }
 
-@keyframes kc-cycle-about {
-  0%   { opacity: 0;    transform: translateY(6px);  filter: blur(3px); }
-  10%  { opacity: 0.65; transform: translateY(0);    filter: blur(0);   }
-  35%  { opacity: 0.65; transform: translateY(0);    filter: blur(0);   }
-  45%  { opacity: 0;    transform: translateY(-6px); filter: blur(3px); }
-  100% { opacity: 0;    transform: translateY(-6px); filter: blur(3px); }
+.artist-nav__about {
+  animation: kc-cycle-about 4.8s cubic-bezier(0.4, 0, 0.2, 1) 4.5s infinite both;
 }
 
 @keyframes kc-cycle-contact {
-  0%   { opacity: 0;    transform: translateY(6px);  filter: blur(3px); }
-  40%  { opacity: 0;    transform: translateY(6px);  filter: blur(3px); }
-  50%  { opacity: 0.65; transform: translateY(0);    filter: blur(0);   }
-  75%  { opacity: 0.65; transform: translateY(0);    filter: blur(0);   }
-  85%  { opacity: 0;    transform: translateY(-6px); filter: blur(3px); }
-  100% { opacity: 0;    transform: translateY(-6px); filter: blur(3px); }
+  0%   { opacity: 0;    transform: translateX(-10px); filter: blur(3px); }
+  8%   { opacity: 0.65; transform: translateX(0);     filter: blur(0);   }
+  43%  { opacity: 0.65; transform: translateX(0);     filter: blur(0);   }
+  49%  { opacity: 0;    transform: translateX(10px);  filter: blur(3px); }
+  50%, 100% { opacity: 0; transform: translateX(10px); filter: blur(3px); }
+}
+
+@keyframes kc-cycle-about {
+  0%, 50%   { opacity: 0;    transform: translateX(-10px); filter: blur(3px); }
+  51%       { opacity: 0;    transform: translateX(-10px); filter: blur(3px); }
+  59%       { opacity: 0.65; transform: translateX(0);     filter: blur(0);   }
+  93%       { opacity: 0.65; transform: translateX(0);     filter: blur(0);   }
+  99%, 100% { opacity: 0;    transform: translateX(10px);  filter: blur(3px); }
 }
 
 /* ── Hover / .hovered state ──────────────────────────────────────── */
@@ -414,12 +428,17 @@ body {
   animation: none !important; /* stop cycle completely to override transform/filter */
   opacity: 0.65;
   filter: blur(0);
-  transform: translateY(0);
+  transform: translateX(0);
 }
 
 .artist-name-wrap:hover .artist-nav__contact,
 .artist-name-wrap.hovered .artist-nav__contact {
   bottom: 14px; /* Slide up to stack above ABOUT */
+}
+
+.artist-name-wrap:hover .artist-nav__about,
+.artist-name-wrap.hovered .artist-nav__about {
+  bottom: 0px;
 }
 
 .artist-name-wrap:hover .artist-nav__link:hover,
