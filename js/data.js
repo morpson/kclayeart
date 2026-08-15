@@ -24,7 +24,7 @@ const POSTS_DATA = [
     filename: "2026-01-07_18-03-02_UTC_1.jpg",
     url: "https://www.instagram.com/p/DW2e7CPDLsH/",
     likes: 0,
-    frame: "frame-square-classic"       // art 1.127 → square (user reverted this)
+    frame: "frame-landscape-wide"       // art 1.802 → 1.805, diff 0.003 (IMG_4918 rotated+cropped)
   },
   {
     filename: "2025-11-07_18-19-59_UTC_1.jpg",
@@ -36,7 +36,7 @@ const POSTS_DATA = [
     filename: "2025-08-15_19-35-57_UTC_1.jpg",
     url: "https://www.instagram.com/p/DNYzp3yvwaO/",
     likes: 0,
-    frame: "frame-tall-narrow"          // art 0.769 → 0.840, diff 0.071 (vary; sharp 840px src)
+    frame: "frame-tall-narrow"          // art 0.769 → 0.840, diff 0.071
   },
   {
     filename: "2025-07-05_18-03-24_UTC_1.jpg",

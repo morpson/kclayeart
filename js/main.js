@@ -35,6 +35,26 @@
   const siteHeader = document.getElementById('site-header');
   const gallery    = document.getElementById('gallery');
 
+  // --- Touch-hint overlay -----------------------------------------------
+  // Show the touch-hint for ~3s after the intro finishes, then fade it out.
+  const touchHint = document.getElementById('touch-hint');
+  if (touchHint) {
+    // Appear as soon as the intro fades (~3.9s)
+    setTimeout(() => {
+      touchHint.classList.add('visible');
+    }, 3900);
+
+    // Fade out 3s later (6.9s total), then fully remove from paint
+    setTimeout(() => {
+      touchHint.classList.remove('visible');
+      touchHint.classList.add('fadeout');
+      // After the fade transition ends, hide it completely
+      touchHint.addEventListener('transitionend', () => {
+        touchHint.style.display = 'none';
+      }, { once: true });
+    }, 6900);
+  }
+
   setTimeout(() => {
     if (siteHeader) siteHeader.classList.add('visible');
     if (gallery)    gallery.classList.add('visible');
@@ -244,5 +264,31 @@
   });
 
   ro.observe(gallery);
+
+  // --- Artist-name hover state -----------------------------------------
+  // On hover/touch, add .hovered to pause the cycle animation and show
+  // both nav labels simultaneously. Remove on mouse-leave or outside click.
+  const artistWrap = document.getElementById('artist-name-wrap');
+
+  if (artistWrap) {
+    artistWrap.addEventListener('mouseenter', () => {
+      artistWrap.classList.add('hovered');
+    });
+    artistWrap.addEventListener('mouseleave', () => {
+      artistWrap.classList.remove('hovered');
+    });
+
+    // Touch / click toggle for mobile
+    artistWrap.addEventListener('click', (e) => {
+      if (e.target.closest('.artist-nav__link')) return; // let nav links fire
+      artistWrap.classList.toggle('hovered');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!artistWrap.contains(e.target)) {
+        artistWrap.classList.remove('hovered');
+      }
+    });
+  }
 
 })();

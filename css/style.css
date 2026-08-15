@@ -106,20 +106,326 @@ body {
   pointer-events: auto;
 }
 
-/* ── Artist name link (top-left) ── */
+/* ---------- Touch-hint overlay ---------- */
+/* Sits above gallery but below header; appears after intro, fades out */
+.touch-hint {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  /* Hidden initially; JS adds .visible after intro, then .fadeout to dismiss */
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.touch-hint.visible {
+  opacity: 1;
+}
+
+.touch-hint.fadeout {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+/* Stage (320×320 container, matches Touch-frame.html dimensions) */
+.touch-hint__stage {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ambient glow behind glass */
+.touch-hint__ambient-glow {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: rgba(255,255,255,0.1);
+  filter: blur(40px);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+/* Glassmorphic circle */
+.touch-hint__glass-circle {
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow:
+    0 25px 50px rgba(0,0,0,0.5),
+    inset 0 1px 1px rgba(255,255,255,0.2);
+  z-index: 1;
+  animation: touch-hint-pulse 6s ease-in-out infinite alternate;
+}
+
+[data-theme="light"] .touch-hint__glass-circle {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.12);
+  box-shadow:
+    0 25px 50px rgba(0,0,0,0.15),
+    inset 0 1px 1px rgba(255,255,255,0.6);
+}
+
+/* Painting wrapper */
+.touch-hint__painting-wrapper {
+  position: relative;
+  width: 150px;
+  height: 190px;
+  transform-origin: 40% 70%;
+  transform: rotate(-4deg);
+  z-index: 2;
+  animation: touch-hint-bounce 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.touch-hint__ornate-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8));
+}
+
+/* Tap ripple ring */
+.touch-hint__ripple {
+  position: absolute;
+  top: 60%;
+  left: 65%;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid #ffffff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  z-index: 4;
+  animation: touch-hint-ripple 3s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+[data-theme="light"] .touch-hint__ripple {
+  border-color: #111;
+}
+
+/* Pointing hand cursor */
+.touch-hint__cursor-hand {
+  position: absolute;
+  top: 58%;
+  left: 62%;
+  width: 54px;
+  height: 64px;
+  z-index: 5;
+  transform-origin: top left;
+  animation: touch-hint-hand 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.touch-hint__cursor-hand svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.7));
+}
+
+[data-theme="light"] .touch-hint__cursor-hand svg g {
+  fill: #111;
+  stroke: rgba(255,255,255,0.4);
+}
+
+/* Touch-hint keyframes */
+@keyframes touch-hint-hand {
+  0%, 100% {
+    transform: translate(50px, 50px) rotate(15deg) scale(0.95);
+    opacity: 0.7;
+  }
+  38% {
+    transform: translate(0px, 0px) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  44% {
+    transform: translate(-2px, -2px) rotate(-3deg) scale(0.9);
+  }
+  56% {
+    transform: translate(0px, 0px) rotate(0deg) scale(1);
+  }
+  80% {
+    transform: translate(50px, 50px) rotate(15deg) scale(0.95);
+    opacity: 0.7;
+  }
+}
+
+@keyframes touch-hint-bounce {
+  0%, 38%, 75%, 100% {
+    transform: rotate(-4deg) scale(1);
+  }
+  44% {
+    transform: rotate(-2deg) scale(0.96);
+  }
+  52% {
+    transform: rotate(-5deg) scale(1.02);
+  }
+  62% {
+    transform: rotate(-4deg) scale(1);
+  }
+}
+
+@keyframes touch-hint-ripple {
+  0%, 42% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  44% {
+    opacity: 1;
+  }
+  65% {
+    transform: translate(-50%, -50%) scale(5);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes touch-hint-pulse {
+  0%   { transform: scale(1); }
+  100% { transform: scale(1.02); }
+}
+
+/* ---------- Artist-name block (top-left) ---------- */
+/*
+ * Structure (stacked top→bottom):
+ *   .artist-nav__contact  — "CONTACT" label
+ *   .artist-nav__about    — "ABOUT"   label
+ *   .artist-name          — "KATHERINE CLAYE" (always visible once header shows)
+ *
+ * Timing contract:
+ *   The .site-header fades in at t=3.9s over 0.6s → fully visible at ~t=4.5s.
+ *   The cycle animation has animation-delay: 4.5s so the first label only
+ *   begins to appear after the header has fully settled into view.
+ *   The name itself has no extra delay — it rides the parent header's
+ *   opacity transition naturally.
+ *
+ * Idle / cycle (10s loop, starts after 4.5s delay):
+ *   0–45%  → ABOUT fades in, holds, fades out
+ *   40–85% → CONTACT fades in, holds, fades out
+ *   85–100%→ both off (pause)
+ *
+ * Hover / .hovered:
+ *   Both labels snap to opacity 0.55 simultaneously and hold.
+ *   Animation is paused so it resumes from the same point on mouse-leave.
+ */
+
+.artist-name-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  cursor: default;
+  /* Reserve space above the name for the two stacked labels */
+  padding-top: 36px;
+}
+
+/* The name text — inherits opacity from parent header fade-in */
 .artist-name {
+  display: block;
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  text-decoration: none;
   color: var(--text);
   opacity: 0.65;
   transition: opacity 0.25s ease, color 0.6s ease;
   white-space: nowrap;
+  user-select: none;
 }
 
-.artist-name:hover {
+.artist-name-wrap:hover .artist-name,
+.artist-name-wrap.hovered .artist-name {
+  opacity: 1;
+}
+
+/* Nav container — absolutely positioned in the padding-top zone */
+.artist-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.artist-name-wrap:hover .artist-nav,
+.artist-name-wrap.hovered .artist-nav {
+  pointer-events: auto;
+}
+
+/* Shared label styles */
+.artist-nav__link {
+  display: block;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text);
+  white-space: nowrap;
+  line-height: 1.3;
+  opacity: 0; /* hidden until animation or hover kicks in */
+  transition: color 0.6s ease;
+}
+
+/* ── Idle cycle animation ──────────────────────────────────────────
+ * Delay of 4.5s matches the moment .site-header finishes fading in
+ * (3.9s JS trigger + 0.6s CSS opacity transition).
+ * The animation itself runs on a 10s infinite loop after that.
+ *
+ * ABOUT:   0%→8%  fade in │ 8%→35%  hold │ 35%→45% fade out
+ * CONTACT: 40%→50% fade in │ 50%→75% hold │ 75%→85% fade out
+ * Gap:     85%→100% both off (1.5s natural pause before repeat)
+ */
+.artist-nav__about {
+  animation: kc-cycle-about 10s cubic-bezier(0.4, 0, 0.2, 1) 4.5s infinite both;
+}
+
+.artist-nav__contact {
+  animation: kc-cycle-contact 10s cubic-bezier(0.4, 0, 0.2, 1) 4.5s infinite both;
+}
+
+@keyframes kc-cycle-about {
+  0%   { opacity: 0;    }
+  8%   { opacity: 0.55; }
+  35%  { opacity: 0.55; }
+  45%  { opacity: 0;    }
+  100% { opacity: 0;    }
+}
+
+@keyframes kc-cycle-contact {
+  0%   { opacity: 0;    }
+  40%  { opacity: 0;    }
+  50%  { opacity: 0.55; }
+  75%  { opacity: 0.55; }
+  85%  { opacity: 0;    }
+  100% { opacity: 0;    }
+}
+
+/* ── Hover / .hovered state ────────────────────────────────────────
+ * Pause the running animation in place; override opacity via transition
+ * so both labels fade in together smoothly.
+ */
+.artist-name-wrap:hover .artist-nav__link,
+.artist-name-wrap.hovered .artist-nav__link {
+  animation-play-state: paused;
+  opacity: 0.55;
+  transition: opacity 0.2s ease, color 0.6s ease;
+}
+
+.artist-name-wrap:hover .artist-nav__link:hover,
+.artist-name-wrap.hovered .artist-nav__link:hover {
   opacity: 1;
 }
 

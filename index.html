@@ -22,15 +22,94 @@
     <h1 class="intro-text">Katherine Claye</h1>
   </div>
 
+  <!-- ── Touch-hint overlay (appears after intro, fades out after ~3s) ── -->
+  <div id="touch-hint" class="touch-hint" aria-hidden="true">
+    <div class="touch-hint__stage">
+      <div class="touch-hint__ambient-glow"></div>
+      <div class="touch-hint__glass-circle"></div>
+
+      <!-- Ornate Frame & Painting -->
+      <div class="touch-hint__painting-wrapper">
+        <svg class="touch-hint__ornate-svg" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="0" width="120" height="160" fill="#27272a" stroke="#18181b" stroke-width="2"/>
+          <rect x="6" y="6" width="108" height="148" fill="#3f3f46"/>
+          <rect x="12" y="12" width="96" height="136" fill="none" stroke="#71717a" stroke-width="2"/>
+          <path d="M 6 20 Q 20 20 20 6" fill="none" stroke="#a1a1aa" stroke-width="2"/>
+          <path d="M 114 20 Q 100 20 100 6" fill="none" stroke="#a1a1aa" stroke-width="2"/>
+          <path d="M 6 140 Q 20 140 20 154" fill="none" stroke="#a1a1aa" stroke-width="2"/>
+          <path d="M 114 140 Q 100 140 100 154" fill="none" stroke="#a1a1aa" stroke-width="2"/>
+          <circle cx="20" cy="20" r="3" fill="#52525b"/>
+          <circle cx="100" cy="20" r="3" fill="#52525b"/>
+          <circle cx="20" cy="140" r="3" fill="#52525b"/>
+          <circle cx="100" cy="140" r="3" fill="#52525b"/>
+          <rect x="18" y="18" width="84" height="124" fill="#09090b"/>
+          <rect x="22" y="22" width="76" height="116" fill="#18181b"/>
+          <rect x="22" y="22" width="76" height="116" fill="#18181b"/>
+          <rect x="22" y="108" width="76" height="30" fill="#27272a"/>
+          <line x1="38" y1="138" x2="38" y2="72" stroke="#52525b" stroke-width="3" stroke-linecap="round"/>
+          <path d="M 38 100 Q 28 92 26 82" fill="none" stroke="#52525b" stroke-width="2"/>
+          <ellipse cx="24" cy="80" rx="6" ry="4" fill="#3f3f46" transform="rotate(-30 24 80)"/>
+          <ellipse cx="38" cy="62" rx="7" ry="12" fill="#71717a" transform="rotate(0 38 62)"/>
+          <ellipse cx="38" cy="62" rx="7" ry="12" fill="#71717a" transform="rotate(45 38 62)"/>
+          <ellipse cx="38" cy="62" rx="7" ry="12" fill="#71717a" transform="rotate(90 38 62)"/>
+          <ellipse cx="38" cy="62" rx="7" ry="12" fill="#71717a" transform="rotate(135 38 62)"/>
+          <circle cx="38" cy="62" r="8" fill="#e4e4e7" opacity="0.9"/>
+          <circle cx="38" cy="62" r="4" fill="#a1a1aa"/>
+          <line x1="60" y1="138" x2="60" y2="55" stroke="#52525b" stroke-width="3" stroke-linecap="round"/>
+          <path d="M 60 95 Q 72 88 74 76" fill="none" stroke="#52525b" stroke-width="2"/>
+          <ellipse cx="76" cy="74" rx="7" ry="4" fill="#3f3f46" transform="rotate(20 76 74)"/>
+          <ellipse cx="60" cy="44" rx="8" ry="14" fill="#a1a1aa" transform="rotate(0 60 44)"/>
+          <ellipse cx="60" cy="44" rx="8" ry="14" fill="#a1a1aa" transform="rotate(45 60 44)"/>
+          <ellipse cx="60" cy="44" rx="8" ry="14" fill="#a1a1aa" transform="rotate(90 60 44)"/>
+          <ellipse cx="60" cy="44" rx="8" ry="14" fill="#a1a1aa" transform="rotate(135 60 44)"/>
+          <circle cx="60" cy="44" r="9" fill="#e4e4e7"/>
+          <circle cx="60" cy="44" r="5" fill="#71717a"/>
+          <line x1="82" y1="138" x2="82" y2="78" stroke="#52525b" stroke-width="3" stroke-linecap="round"/>
+          <path d="M 82 105 Q 70 98 68 88" fill="none" stroke="#52525b" stroke-width="2"/>
+          <ellipse cx="66" cy="86" rx="6" ry="4" fill="#3f3f46" transform="rotate(-20 66 86)"/>
+          <ellipse cx="82" cy="67" rx="7" ry="12" fill="#71717a" transform="rotate(25 82 67)"/>
+          <ellipse cx="82" cy="67" rx="7" ry="12" fill="#71717a" transform="rotate(70 82 67)"/>
+          <ellipse cx="82" cy="67" rx="7" ry="12" fill="#71717a" transform="rotate(115 82 67)"/>
+          <ellipse cx="82" cy="67" rx="7" ry="12" fill="#71717a" transform="rotate(160 82 67)"/>
+          <circle cx="82" cy="67" r="8" fill="#e4e4e7" opacity="0.9"/>
+          <circle cx="82" cy="67" r="4" fill="#a1a1aa"/>
+        </svg>
+      </div>
+
+      <!-- Tap ripple ring -->
+      <div class="touch-hint__ripple"></div>
+
+      <!-- Pointing hand cursor -->
+      <div class="touch-hint__cursor-hand">
+        <svg viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <!-- Simplified pointing hand / finger icon -->
+          <g fill="white" stroke="rgba(0,0,0,0.3)" stroke-width="1">
+            <!-- Finger body -->
+            <rect x="22" y="4" width="16" height="32" rx="8"/>
+            <!-- Palm -->
+            <rect x="10" y="24" width="40" height="28" rx="10"/>
+            <!-- Extra fingers stacked -->
+            <rect x="10" y="22" width="14" height="26" rx="7"/>
+            <rect x="36" y="24" width="14" height="24" rx="7"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
   <!-- ── Persistent header (fades in after intro) ──────────────── -->
   <header id="site-header" class="site-header">
 
-    <!-- Left: artist name → mailto -->
-    <a class="artist-name"
-       href="mailto:cgillis15@gmail.com"
-       aria-label="Email Katherine Claye">
-      Katherine Claye
-    </a>
+    <!-- Left: artist name with CSS-animated nav -->
+    <div class="artist-name-wrap" id="artist-name-wrap">
+      <!-- Nav labels — cycle one at a time when idle, both on hover -->
+      <nav class="artist-nav" aria-label="Site navigation">
+        <a href="#contact" class="artist-nav__link artist-nav__contact" data-nav="contact">Contact</a>
+        <a href="#about"   class="artist-nav__link artist-nav__about"   data-nav="about">About</a>
+      </nav>
+      <!-- The name itself -->
+      <span class="artist-name" aria-label="Katherine Claye">Katherine Claye</span>
+    </div>
 
     <!-- Right: layout controls + theme toggle -->
     <div class="header-controls">
