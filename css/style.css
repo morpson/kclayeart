@@ -296,26 +296,21 @@ body {
 
 /* ---------- Artist-name block (top-left) ---------- */
 /*
- * Structure (stacked top→bottom):
+ * Structure:
  *   .artist-nav__contact  — "CONTACT" label
  *   .artist-nav__about    — "ABOUT"   label
  *   .artist-name          — "KATHERINE CLAYE" (always visible once header shows)
  *
  * Timing contract:
  *   The .site-header fades in at t=3.9s over 0.6s → fully visible at ~t=4.5s.
- *   The cycle animation has animation-delay: 4.5s so the first label only
- *   begins to appear after the header has fully settled into view.
- *   The name itself has no extra delay — it rides the parent header's
- *   opacity transition naturally.
+ *   The cycle animation has animation-delay: 4.5s.
  *
- * Idle / cycle (10s loop, starts after 4.5s delay):
- *   0–45%  → ABOUT fades in, holds, fades out
- *   40–85% → CONTACT fades in, holds, fades out
- *   85–100%→ both off (pause)
+ * Idle / cycle (10s loop):
+ *   Both labels are absolutely positioned at the SAME vertical spot.
+ *   They take turns drifting and fading in (with a subtle blur).
  *
  * Hover / .hovered:
- *   Both labels snap to opacity 0.55 simultaneously and hold.
- *   Animation is paused so it resumes from the same point on mouse-leave.
+ *   Animation is paused. Both fade in, and CONTACT slides up to stack.
  */
 
 .artist-name-wrap {
@@ -324,11 +319,11 @@ body {
   flex-direction: column;
   align-items: flex-start;
   cursor: default;
-  /* Reserve space above the name for the two stacked labels */
-  padding-top: 36px;
+  /* Reserve space above the name for the stack */
+  padding-top: 32px;
 }
 
-/* The name text — inherits opacity from parent header fade-in */
+/* The name text */
 .artist-name {
   display: block;
   font-size: 0.8rem;
@@ -347,14 +342,12 @@ body {
   opacity: 1;
 }
 
-/* Nav container — absolutely positioned in the padding-top zone */
+/* Nav container */
 .artist-nav {
   position: absolute;
-  top: 0;
+  bottom: 100%;
   left: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  width: 100%;
   pointer-events: none;
 }
 
@@ -365,6 +358,9 @@ body {
 
 /* Shared label styles */
 .artist-nav__link {
+  position: absolute;
+  bottom: 0;
+  left: 0;
   display: block;
   font-family: 'Playfair Display', 'Georgia', serif;
   font-size: 0.62rem;
@@ -375,19 +371,18 @@ body {
   color: var(--text);
   white-space: nowrap;
   line-height: 1.3;
-  opacity: 0; /* hidden until animation or hover kicks in */
-  transition: color 0.6s ease;
+  opacity: 0;
+  filter: blur(4px);
+  transform: translateY(4px);
+  /* Smoothly transition when hovered */
+  transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.6s ease,
+              opacity 0.4s ease,
+              filter 0.4s ease,
+              transform 0.4s ease;
 }
 
-/* ── Idle cycle animation ──────────────────────────────────────────
- * Delay of 4.5s matches the moment .site-header finishes fading in
- * (3.9s JS trigger + 0.6s CSS opacity transition).
- * The animation itself runs on a 10s infinite loop after that.
- *
- * ABOUT:   0%→8%  fade in │ 8%→35%  hold │ 35%→45% fade out
- * CONTACT: 40%→50% fade in │ 50%→75% hold │ 75%→85% fade out
- * Gap:     85%→100% both off (1.5s natural pause before repeat)
- */
+/* ── Idle cycle animation ────────────────────────────────────────── */
 .artist-nav__about {
   animation: kc-cycle-about 10s cubic-bezier(0.4, 0, 0.2, 1) 4.5s infinite both;
 }
@@ -397,31 +392,34 @@ body {
 }
 
 @keyframes kc-cycle-about {
-  0%   { opacity: 0;    }
-  8%   { opacity: 0.55; }
-  35%  { opacity: 0.55; }
-  45%  { opacity: 0;    }
-  100% { opacity: 0;    }
+  0%   { opacity: 0;    transform: translateY(6px);  filter: blur(3px); }
+  10%  { opacity: 0.65; transform: translateY(0);    filter: blur(0);   }
+  35%  { opacity: 0.65; transform: translateY(0);    filter: blur(0);   }
+  45%  { opacity: 0;    transform: translateY(-6px); filter: blur(3px); }
+  100% { opacity: 0;    transform: translateY(-6px); filter: blur(3px); }
 }
 
 @keyframes kc-cycle-contact {
-  0%   { opacity: 0;    }
-  40%  { opacity: 0;    }
-  50%  { opacity: 0.55; }
-  75%  { opacity: 0.55; }
-  85%  { opacity: 0;    }
-  100% { opacity: 0;    }
+  0%   { opacity: 0;    transform: translateY(6px);  filter: blur(3px); }
+  40%  { opacity: 0;    transform: translateY(6px);  filter: blur(3px); }
+  50%  { opacity: 0.65; transform: translateY(0);    filter: blur(0);   }
+  75%  { opacity: 0.65; transform: translateY(0);    filter: blur(0);   }
+  85%  { opacity: 0;    transform: translateY(-6px); filter: blur(3px); }
+  100% { opacity: 0;    transform: translateY(-6px); filter: blur(3px); }
 }
 
-/* ── Hover / .hovered state ────────────────────────────────────────
- * Pause the running animation in place; override opacity via transition
- * so both labels fade in together smoothly.
- */
+/* ── Hover / .hovered state ──────────────────────────────────────── */
 .artist-name-wrap:hover .artist-nav__link,
 .artist-name-wrap.hovered .artist-nav__link {
-  animation-play-state: paused;
-  opacity: 0.55;
-  transition: opacity 0.2s ease, color 0.6s ease;
+  animation: none !important; /* stop cycle completely to override transform/filter */
+  opacity: 0.65;
+  filter: blur(0);
+  transform: translateY(0);
+}
+
+.artist-name-wrap:hover .artist-nav__contact,
+.artist-name-wrap.hovered .artist-nav__contact {
+  bottom: 14px; /* Slide up to stack above ABOUT */
 }
 
 .artist-name-wrap:hover .artist-nav__link:hover,
