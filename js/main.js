@@ -559,9 +559,10 @@
   }
 
   // --- Auto-scroll Play Toggle ------------------------------------------
-  const autoScrollBtn = document.getElementById('auto-scroll-toggle');
-  let isAutoScrolling = false;
-  let autoScrollRaf   = null;
+  const autoScrollBtn     = document.getElementById('auto-scroll-toggle');
+  let isAutoScrolling     = false;
+  let autoScrollRaf       = null;
+  let autoScrollStartTime = 0;
 
   function stopAutoScroll() {
     if (!isAutoScrolling) return;
@@ -573,19 +574,20 @@
     if (autoScrollBtn) {
       autoScrollBtn.classList.remove('playing');
       autoScrollBtn.setAttribute('aria-pressed', 'false');
-      autoScrollBtn.setAttribute('title', 'Play auto-scroll');
+      autoScrollBtn.setAttribute('title', 'Auto-scroll gallery');
     }
   }
 
   function startAutoScroll() {
-    isAutoScrolling = true;
+    isAutoScrolling     = true;
+    autoScrollStartTime = performance.now();
     if (autoScrollBtn) {
       autoScrollBtn.classList.add('playing');
       autoScrollBtn.setAttribute('aria-pressed', 'true');
       autoScrollBtn.setAttribute('title', 'Pause auto-scroll');
     }
 
-    const scrollSpeed = 0.75; // pixels per frame at 60fps (very slow, smooth gallery exhibition pace)
+    const scrollSpeed = 0.95; // pixels per 16.67ms (smooth exhibition scroll)
     let lastTime = performance.now();
 
     function step(now) {
@@ -593,8 +595,12 @@
       const dt = Math.min(now - lastTime, 50);
       lastTime = now;
 
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      if (window.scrollY >= maxScroll - 2) {
+      const maxScroll = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight
+      ) - window.innerHeight;
+
+      if (window.scrollY >= maxScroll - 4) {
         stopAutoScroll();
         return;
       }
@@ -607,7 +613,9 @@
   }
 
   if (autoScrollBtn) {
-    autoScrollBtn.addEventListener('click', () => {
+    autoScrollBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       if (isAutoScrolling) {
         stopAutoScroll();
       } else {
@@ -615,13 +623,28 @@
       }
     });
 
-    // Pause auto-scroll gracefully on manual user interaction
+    // Pause auto-scroll gracefully on intentional manual user interaction
     window.addEventListener('wheel', (e) => {
-      if (isAutoScrolling && Math.abs(e.deltaY) > 4) stopAutoScroll();
+      if (isAutoScrolling && performance.now() - autoScrollStartTime > 400 && Math.abs(e.deltaY) > 2) {
+        stopAutoScroll();
+      }
     }, { passive: true });
-    window.addEventListener('touchmove', () => {
-      if (isAutoScrolling) stopAutoScroll();
+
+    let touchStartY = 0;
+    window.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches[0]) {
+        touchStartY = e.touches[0].clientY;
+      }
     }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (isAutoScrolling && performance.now() - autoScrollStartTime > 500) {
+        if (e.touches && e.touches[0] && Math.abs(e.touches[0].clientY - touchStartY) > 5) {
+          stopAutoScroll();
+        }
+      }
+    }, { passive: true });
+
     window.addEventListener('keydown', (e) => {
       if (isAutoScrolling && ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space'].includes(e.code)) {
         stopAutoScroll();
