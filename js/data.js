@@ -36,9 +36,9 @@ const POSTS_DATA = [
     "url": "https://www.instagram.com/p/DW2e7CPDLsH/",
     "likes": 26,
     "subject": "figure",
-    "frame": "5frame",
-    "aspectRatio": 0.667,
-    "mat": { "top": 32.83, "left": 27.79, "width": 44.55, "height": 39.72 },
+    "frame": "frame-portrait-silver",
+    "aspectRatio": 0.8306,
+    "mat": { "top": 15.37, "left": 19.3, "width": 60.6, "height": 69.02 },
     "modern": {
       "frame": "modern_frame28.PNG",
       "aspectRatio": 0.761,
@@ -79,7 +79,7 @@ const POSTS_DATA = [
     "likes": 41,
     "subject": "animal",
     "frame": "3frame",
-    "aspectRatio": 0.817,
+    "aspectRatio": 0.8173,
     "mat": { "top": 8.53, "left": 10.36, "width": 78.79, "height": 82.8 },
     "modern": {
       "frame": "modern_frame26.PNG",
@@ -107,7 +107,7 @@ const POSTS_DATA = [
     "likes": 38,
     "subject": "landscape",
     "frame": "frame-landscape-c",
-    "aspectRatio": 0.723,
+    "aspectRatio": 0.7071,
     "mat": { "top": 12.63, "left": 17.38, "width": 65.95, "height": 74.92 },
     "modern": {
       "frame": "modern_frame5.PNG",
@@ -149,7 +149,7 @@ const POSTS_DATA = [
     "likes": 35,
     "subject": "landscape",
     "frame": "frame-landscape-bold",
-    "aspectRatio": 1.333,
+    "aspectRatio": 1.3333,
     "mat": { "top": 13.07, "left": 21.6, "width": 56.7, "height": 69.6 },
     "modern": {
       "frame": "modern_frame20.PNG",
@@ -163,7 +163,7 @@ const POSTS_DATA = [
     "likes": 31,
     "subject": "figure",
     "frame": "3frame",
-    "aspectRatio": 0.817,
+    "aspectRatio": 0.8173,
     "mat": { "top": 8.53, "left": 10.36, "width": 78.79, "height": 82.8 },
     "modern": {
       "frame": "modern_frame2.PNG",
@@ -191,12 +191,12 @@ const POSTS_DATA = [
     "likes": 34,
     "subject": "architecture",
     "frame": "2frame",
-    "aspectRatio": 0.805,
+    "aspectRatio": 1.0,
     "mat": { "top": 21.74, "left": 31.25, "width": 37.36, "height": 56.25 },
     "modern": {
-      "frame": "modern_frame23.PNG",
-      "aspectRatio": 0.667,
-      "mat": { "top": 7.0, "left": 14.09, "width": 71.81, "height": 86.0 }
+      "frame": "modern_frame18.PNG",
+      "aspectRatio": 1.0,
+      "mat": { "top": 19.17, "left": 18.58, "width": 62.17, "height": 62.08 }
     }
   },
   {
@@ -233,7 +233,7 @@ const POSTS_DATA = [
     "likes": 32,
     "subject": "landscape",
     "frame": "frame-portrait-slim",
-    "aspectRatio": 0.763,
+    "aspectRatio": 0.7071,
     "mat": { "top": 12.12, "left": 16.19, "width": 66.19, "height": 75.25 },
     "modern": {
       "frame": "modern_frame19.PNG",
@@ -261,12 +261,12 @@ const POSTS_DATA = [
     "likes": 33,
     "subject": "pet",
     "frame": "frame-portrait-gold",
-    "aspectRatio": 0.675,
+    "aspectRatio": 0.8322,
     "mat": { "top": 11.23, "left": 19.67, "width": 60.58, "height": 76.56 },
     "modern": {
-      "frame": "modern_frame6.PNG",
-      "aspectRatio": 0.667,
-      "mat": { "top": 17.74, "left": 21.25, "width": 59.92, "height": 64.52 }
+      "frame": "modern_frame26.PNG",
+      "aspectRatio": 0.86,
+      "mat": { "top": 13.48, "left": 17.83, "width": 64.33, "height": 72.97 }
     }
   },
   {
@@ -289,7 +289,7 @@ const POSTS_DATA = [
     "likes": 29,
     "subject": "pet",
     "frame": "frame-square-new",
-    "aspectRatio": 1.133,
+    "aspectRatio": 1.0,
     "mat": { "top": 7.83, "left": 7.25, "width": 84.5, "height": 84.83 },
     "modern": {
       "frame": "modern_frame27.PNG",
@@ -303,7 +303,7 @@ const POSTS_DATA = [
     "likes": 24,
     "subject": "portrait",
     "frame": "frame-tall-ornate",
-    "aspectRatio": 0.802,
+    "aspectRatio": 0.7131,
     "mat": { "top": 7.77, "left": 10.89, "width": 78.77, "height": 84.46 },
     "modern": {
       "frame": "modern_frame5.PNG",
