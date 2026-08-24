@@ -1060,12 +1060,17 @@ body.modal-open {
   margin-bottom: 24px;
 }
 
-/* Walking cat layer — walks across screen sitting on top of body text, behind hero profile/title */
+.about-body-wrap {
+  position: relative;
+  width: 100%;
+}
+
+/* Walking cat layer — mathematically locked directly to the top pixel of the body text */
 .maisey-walk-container {
   position: absolute;
-  top: 10px;
+  top: 0;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -76.38%);
   width: 100%;
   max-width: 620px;
   z-index: 3;
@@ -1341,11 +1346,6 @@ body.modal-open {
   .about-media-inline {
     width: 140px;
     margin: 2px 14px 8px 0;
-  }
-
-  .maisey-walk-container {
-    top: 30px;
-    width: 100%;
   }
 
   .about-title {
