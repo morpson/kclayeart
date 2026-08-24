@@ -60,19 +60,9 @@
     if (gallery)    gallery.classList.add('visible');
   }, 3900);
 
-  // --- Header scroll fade & tooltip line state ------------------------
+  // --- Header scroll fade ----------------------------------------------
   let lastScrollY = window.scrollY || 0;
   let scrollTicking = false;
-
-  // Tooltip state — managed here so scroll handler can access it early
-  let _frameTooltipWrapEl = null;
-  let _frameTooltipUsed   = false;
-
-  function setFrameTooltipRef(el) { _frameTooltipWrapEl = el; }
-  function markFrameTooltipUsed() {
-    _frameTooltipUsed = true;
-    if (_frameTooltipWrapEl) _frameTooltipWrapEl.classList.remove('tooltip-active');
-  }
 
   function updateHeaderScroll() {
     const currentY = window.scrollY || 0;
@@ -81,20 +71,12 @@
     if (siteHeader && siteHeader.classList.contains('visible')) {
       if (currentY <= 20) {
         siteHeader.classList.remove('scrolled-down');
-        if (_frameTooltipWrapEl && !_frameTooltipUsed) {
-          _frameTooltipWrapEl.classList.add('tooltip-active');
-        }
-      } else {
-        // Scrolled away from top
-        if (_frameTooltipWrapEl) _frameTooltipWrapEl.classList.remove('tooltip-active');
-
-        if (delta > 6 && currentY > 60) {
-          // Scrolling down
-          siteHeader.classList.add('scrolled-down');
-        } else if (delta < -6) {
-          // Scrolling up
-          siteHeader.classList.remove('scrolled-down');
-        }
+      } else if (delta > 6 && currentY > 60) {
+        // Scrolling down
+        siteHeader.classList.add('scrolled-down');
+      } else if (delta < -6) {
+        // Scrolling up
+        siteHeader.classList.remove('scrolled-down');
       }
     }
 
@@ -417,17 +399,43 @@
   const modalTabs     = document.querySelectorAll('.glass-modal__tab');
   const modalSections = document.querySelectorAll('.glass-modal__section');
   const navLinks      = document.querySelectorAll('.artist-nav__link');
+  const maiseyVideo   = document.getElementById('maisey-walk-video');
+
+  function triggerMaiseyWalk() {
+    if (maiseyVideo) {
+      try {
+        maiseyVideo.currentTime = 0;
+        const playPromise = maiseyVideo.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {});
+        }
+      } catch (err) {}
+    }
+  }
+
+  function pauseMaiseyWalk() {
+    if (maiseyVideo) {
+      try {
+        maiseyVideo.pause();
+      } catch (err) {}
+    }
+  }
 
   function openModal(sectionName) {
     if (!modal) return;
-    switchModalSection(sectionName || 'about');
+    const target = sectionName || 'about';
+    switchModalSection(target);
     modal.classList.add('active');
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
+    if (target === 'about') {
+      triggerMaiseyWalk();
+    }
   }
 
   function closeModal() {
     if (!modal) return;
+    pauseMaiseyWalk();
     modal.classList.remove('active');
     modal.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('modal-open');
@@ -447,6 +455,12 @@
       const isTarget = section.dataset.section === sectionName;
       section.classList.toggle('active', isTarget);
     });
+
+    if (sectionName === 'about') {
+      triggerMaiseyWalk();
+    } else {
+      pauseMaiseyWalk();
+    }
   }
 
   navLinks.forEach((link) => {
@@ -616,22 +630,11 @@
   }
 
   // --- Frame style toggle (Eclectic <-> Modern) -------------------------
-  const frameStyleToggle   = document.getElementById('frame-style-toggle');
-  const frameToggleWrapEl  = document.getElementById('frame-toggle-wrap');
-  let currentFrameStyle    = 'eclectic';
-
-  setFrameTooltipRef(frameToggleWrapEl);
-
-  setTimeout(() => {
-    if (frameToggleWrapEl && window.scrollY <= 20) {
-      frameToggleWrapEl.classList.add('tooltip-active');
-    }
-  }, 4100);
+  const frameStyleToggle = document.getElementById('frame-style-toggle');
+  let currentFrameStyle  = 'eclectic';
 
   if (frameStyleToggle) {
     frameStyleToggle.addEventListener('click', () => {
-      markFrameTooltipUsed();
-
       currentFrameStyle = currentFrameStyle === 'eclectic' ? 'modern' : 'eclectic';
       frameStyleToggle.classList.toggle('modern', currentFrameStyle === 'modern');
 

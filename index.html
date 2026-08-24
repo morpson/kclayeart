@@ -161,13 +161,6 @@
             <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
           </svg>
         </button>
-        
-        <!-- Animated drawing line strictly underneath toolbar and framing tooltip -->
-        <svg class="tooltip-line-svg" viewBox="-90 0 180 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path class="tooltip-line-path" d="M -85,2 L 0,2 L 0,10 L 38,10 Q 42,10 42,14 L 42,24 Q 42,28 38,28 L -38,28 Q -42,28 -42,24 L -42,14 Q -42,10 -38,10 L 0,10" />
-        </svg>
-
-        <div id="frame-toggle-tooltip" class="frame-toggle-tooltip" aria-hidden="true">Change the view</div>
       </div>
 
       <button id="theme-toggle" class="theme-toggle" aria-label="Toggle light / dark mode" title="Toggle light / dark mode">
@@ -227,12 +220,23 @@
           <!-- ── Section: About ────────────────────────── -->
           <section id="modal-section-about" class="glass-modal__section active" data-section="about" aria-labelledby="tab-about">
             <div class="about-container">
+              
+              <!-- Hero header (z-index above walking cat so cat walks behind profile, title, subtitle) -->
               <div class="about-hero">
                 <div class="about-profile-wrap">
                   <img src="assets/claye-portrait.jpg" alt="Claye Gillis" class="about-profile-img" loading="lazy">
                 </div>
                 <h2 class="about-title">Claye Gillis</h2>
                 <p class="about-subtitle">Original Paintings &amp; Works on Paper</p>
+              </div>
+
+              <!-- Maisey the cat walking across the screen directly on top of body text -->
+              <div class="maisey-walk-container" id="maisey-walk-container" aria-hidden="true">
+                <video id="maisey-walk-video" class="maisey-walk-video" playsinline muted preload="auto">
+                  <source src="assets/videos/maisey_walk.mov" type='video/mp4; codecs="hvc1"'>
+                  <source src="assets/videos/maisey_walk.mov" type="video/quicktime">
+                  <source src="assets/videos/maisey_walk.webm" type='video/webm; codecs="vp9"'>
+                </video>
               </div>
               
               <div class="about-text-flow">
