@@ -402,15 +402,27 @@
   const maiseyVideo   = document.getElementById('maisey-walk-video');
   let maiseyLoopTimer = null;
 
-  function triggerMaiseyWalk() {
+  function scheduleMaiseyWalk(delayMs = 10000) {
     if (maiseyLoopTimer) {
       clearTimeout(maiseyLoopTimer);
       maiseyLoopTimer = null;
     }
     if (maiseyVideo) {
+      maiseyVideo.style.opacity = '0';
+      maiseyVideo.pause();
+    }
+    maiseyLoopTimer = setTimeout(() => {
+      if (modal && modal.classList.contains('active')) {
+        playMaiseyWalk();
+      }
+    }, delayMs);
+  }
+
+  function playMaiseyWalk() {
+    if (maiseyVideo) {
       try {
-        maiseyVideo.style.opacity = '1';
         maiseyVideo.currentTime = 0;
+        maiseyVideo.style.opacity = '1';
         const playPromise = maiseyVideo.play();
         if (playPromise !== undefined) {
           playPromise.catch(() => {});
@@ -426,6 +438,7 @@
     }
     if (maiseyVideo) {
       try {
+        maiseyVideo.style.opacity = '0';
         maiseyVideo.pause();
       } catch (err) {}
     }
@@ -435,12 +448,8 @@
     maiseyVideo.addEventListener('ended', () => {
       // Fade out gently after completing walk
       maiseyVideo.style.opacity = '0';
-      // Wait for a calm 7-second pause before starting next walk cycle
-      maiseyLoopTimer = setTimeout(() => {
-        if (modal && modal.classList.contains('active')) {
-          triggerMaiseyWalk();
-        }
-      }, 7000);
+      // Wait for a calm 10-second pause before starting next walk cycle
+      scheduleMaiseyWalk(10000);
     });
   }
 
@@ -452,7 +461,7 @@
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
     if (target === 'about') {
-      triggerMaiseyWalk();
+      scheduleMaiseyWalk(10000);
     }
   }
 
@@ -480,7 +489,7 @@
     });
 
     if (sectionName === 'about') {
-      triggerMaiseyWalk();
+      scheduleMaiseyWalk(10000);
     } else {
       pauseMaiseyWalk();
     }
