@@ -1063,7 +1063,7 @@ body.modal-open {
 /* Walking cat layer — walks across screen sitting on top of body text, behind hero profile/title */
 .maisey-walk-container {
   position: absolute;
-  top: -15px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
@@ -1344,7 +1344,7 @@ body.modal-open {
   }
 
   .maisey-walk-container {
-    top: 5px;
+    top: 30px;
     width: 100%;
   }
 
