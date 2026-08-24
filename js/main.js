@@ -602,15 +602,17 @@
   }
 
   function startAutoScroll() {
+    if (isAutoScrolling) return;
     isAutoScrolling     = true;
-    autoScrollStartTime = performance.now();
+    autoScrollStartTime = Date.now();
+    
     if (autoScrollBtn) {
       autoScrollBtn.classList.add('playing');
       autoScrollBtn.setAttribute('aria-pressed', 'true');
       autoScrollBtn.setAttribute('title', 'Pause auto-scroll');
     }
 
-    const scrollSpeed = 0.95; // pixels per 16.67ms (smooth exhibition scroll)
+    const scrollSpeed = 1.1; // Smooth, peaceful exhibition scroll speed
     let lastTime = performance.now();
 
     function step(now) {
@@ -620,15 +622,25 @@
 
       const maxScroll = Math.max(
         document.body.scrollHeight,
-        document.documentElement.scrollHeight
+        document.documentElement.scrollHeight,
+        document.body.offsetHeight,
+        document.documentElement.offsetHeight
       ) - window.innerHeight;
 
-      if (window.scrollY >= maxScroll - 4) {
+      const currentScroll = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+
+      if (currentScroll >= maxScroll - 4) {
         stopAutoScroll();
         return;
       }
 
-      window.scrollBy(0, (scrollSpeed * dt) / 16.67);
+      const delta = (scrollSpeed * dt) / 16.67;
+      window.scrollTo({
+        top: currentScroll + delta,
+        left: 0,
+        behavior: 'instant'
+      });
+
       autoScrollRaf = requestAnimationFrame(step);
     }
 
@@ -648,7 +660,7 @@
 
     // Pause auto-scroll gracefully on intentional manual user interaction
     window.addEventListener('wheel', (e) => {
-      if (isAutoScrolling && performance.now() - autoScrollStartTime > 400 && Math.abs(e.deltaY) > 2) {
+      if (isAutoScrolling && Date.now() - autoScrollStartTime > 600 && Math.abs(e.deltaY) > 3) {
         stopAutoScroll();
       }
     }, { passive: true });
@@ -661,8 +673,8 @@
     }, { passive: true });
 
     window.addEventListener('touchmove', (e) => {
-      if (isAutoScrolling && performance.now() - autoScrollStartTime > 500) {
-        if (e.touches && e.touches[0] && Math.abs(e.touches[0].clientY - touchStartY) > 5) {
+      if (isAutoScrolling && Date.now() - autoScrollStartTime > 800) {
+        if (e.touches && e.touches[0] && Math.abs(e.touches[0].clientY - touchStartY) > 20) {
           stopAutoScroll();
         }
       }

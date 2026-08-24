@@ -36,7 +36,10 @@
   padding: 0;
 }
 
-html { scroll-behavior: smooth; }
+html {
+  /* Use auto scroll by default so requestAnimationFrame auto-scroll is instantaneous and never throttled */
+  scroll-behavior: auto;
+}
 
 body {
   background-color: var(--bg);
@@ -489,9 +492,16 @@ body {
 
 /* ── Right side controls: play + sort + frame toggle + theme toggle ── */
 .header-controls {
+  position: relative;
+  z-index: 100;
   display: flex;
   align-items: center;
   gap: 6px;
+  pointer-events: auto;
+}
+
+.header-controls svg {
+  pointer-events: none;
 }
 
 /* ── Auto-scroll play button ── */
@@ -501,6 +511,8 @@ body {
   border-radius: 7px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
@@ -508,11 +520,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
-              box-shadow 0.25s ease,
-              background 0.3s ease,
-              border-color 0.3s ease,
-              color 0.3s ease;
+  transition: transform 0.2s ease,
+              box-shadow 0.2s ease,
+              background 0.25s ease,
+              border-color 0.25s ease,
+              color 0.25s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
   padding: 0;
@@ -524,16 +536,18 @@ body {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
-.scroll-play-btn:hover {
-  transform: scale(1.06);
-  background: rgba(255, 255, 255, 0.6);
-  color: var(--text);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-}
+@media (hover: hover) and (pointer: fine) {
+  .scroll-play-btn:hover {
+    transform: scale(1.06);
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--text);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  }
 
-[data-theme="dark"] .scroll-play-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--text);
+  [data-theme="dark"] .scroll-play-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text);
+  }
 }
 
 .scroll-play-btn .icon-pause { display: none; }
@@ -577,18 +591,22 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   padding: 0;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.sort-btn:hover {
-  background: rgba(255, 255, 255, 0.5);
-  color: var(--text);
-}
+@media (hover: hover) and (pointer: fine) {
+  .sort-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
+    color: var(--text);
+  }
 
-[data-theme="dark"] .sort-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--text);
+  [data-theme="dark"] .sort-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text);
+  }
 }
 
 .sort-btn.active {
@@ -610,6 +628,8 @@ body {
   border-radius: 7px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
@@ -617,11 +637,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
-              box-shadow 0.25s ease,
-              background 0.3s ease,
-              border-color 0.3s ease,
-              color 0.3s ease;
+  transition: transform 0.2s ease,
+              box-shadow 0.2s ease,
+              background 0.25s ease,
+              border-color 0.25s ease,
+              color 0.25s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
   padding: 0;
@@ -633,15 +653,17 @@ body {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
-.theme-toggle:hover {
-  transform: scale(1.06);
-  background: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-}
+@media (hover: hover) and (pointer: fine) {
+  .theme-toggle:hover {
+    transform: scale(1.06);
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  }
 
-[data-theme="dark"] .theme-toggle:hover {
-  background: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  [data-theme="dark"] .theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  }
 }
 
 .icon-sun  { display: none; }
@@ -663,6 +685,8 @@ body {
   border-radius: 7px;
   border: 1px solid rgba(255, 255, 255, 0.5);
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   background: rgba(255, 255, 255, 0.35);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
@@ -670,11 +694,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
-              box-shadow 0.25s ease,
-              background 0.3s ease,
-              border-color 0.3s ease,
-              color 0.3s ease;
+  transition: transform 0.2s ease,
+              box-shadow 0.2s ease,
+              background 0.25s ease,
+              border-color 0.25s ease,
+              color 0.25s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   flex-shrink: 0;
   padding: 0;
@@ -686,17 +710,19 @@ body {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
 }
 
-.frame-style-toggle:hover {
-  transform: scale(1.06);
-  background: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-  color: var(--text);
-}
+@media (hover: hover) and (pointer: fine) {
+  .frame-style-toggle:hover {
+    transform: scale(1.06);
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    color: var(--text);
+  }
 
-[data-theme="dark"] .frame-style-toggle:hover {
-  background: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
-  color: var(--text);
+  [data-theme="dark"] .frame-style-toggle:hover {
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    color: var(--text);
+  }
 }
 
 .frame-style-toggle.modern {
