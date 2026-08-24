@@ -235,16 +235,13 @@
     const totalH = `${Math.max(...heights) - gap + bp}px`;
 
     if (animate) {
-      // Smooth animated rearrange: remove resizing class and let CSS transitions fire
       gallery.classList.remove('resizing');
-      requestAnimationFrame(() => {
-        targets.forEach(({ link, cw, itemH, x, y }) => {
-          link.style.width     = `${cw}px`;
-          link.style.height    = `${itemH}px`;
-          link.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-        });
-        gallery.style.height = totalH;
+      targets.forEach(({ link, cw, itemH, x, y }) => {
+        link.style.width     = `${cw}px`;
+        link.style.height    = `${itemH}px`;
+        link.style.transform = `translate3d(${x}px, ${y}px, 0)`;
       });
+      gallery.style.height = totalH;
     } else {
       // Instant snap (resize / init): suppress transitions temporarily
       gallery.classList.add('resizing');
@@ -279,7 +276,7 @@
       localStorage.setItem('kc-layout-tier', manualOverrideTier);
     }
     updateButtonUI();
-    layout(isManual); // isManual=true → animated; auto/resize → snap
+    layout(isManual); // isManual=true → animated smooth re-arrange
   }
 
   // Wire up buttons
@@ -336,51 +333,37 @@
   });
 
   // After intro: show gallery (images may or may not be loaded yet).
-  // If images already loaded, firstLayoutDone is true and layout is good.
-  // If images are still loading, show the gallery anyway and re-layout
-  // when the last one finishes (onImgReady will still fire).
   setTimeout(() => {
     if (siteHeader) siteHeader.classList.add('visible');
     gallery.classList.add('visible');
-    // If no images loaded yet at all, do a best-effort layout now
     if (!firstLayoutDone) layout(false);
   }, 3900);
 
-  // --- ResizeObserver for smooth responsive reflow ---------------------
-  let prevCols    = colCount();
-  let rafPending  = false;
+  // --- ResizeObserver for smooth responsive reflow (Width changes only) ---
+  let prevWidth   = 0;
   let resizeTimer = null;
 
-  const ro = new ResizeObserver(() => {
-    if (rafPending) return;
-    rafPending = true;
-
-    requestAnimationFrame(() => {
-      rafPending = false;
-      const newCols    = colCount();
-      const colChanged = newCols !== prevCols;
-      prevCols = newCols;
-
-      if (colChanged) {
-        layout(false); // snap on column count change
-      } else {
+  const ro = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const currentWidth = entry.contentRect.width;
+      if (prevWidth === 0) {
+        prevWidth = currentWidth;
+        return;
+      }
+      if (Math.abs(currentWidth - prevWidth) > 3) {
+        prevWidth = currentWidth;
         gallery.classList.add('resizing');
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => {
-          layout(true);
-          requestAnimationFrame(() =>
-            requestAnimationFrame(() => gallery.classList.remove('resizing'))
-          );
+          layout(false);
         }, 60);
       }
-    });
+    }
   });
 
   ro.observe(gallery);
 
   // --- Artist-name hover state -----------------------------------------
-  // On hover/touch, add .hovered to pause the cycle animation and show
-  // both nav labels simultaneously. Includes grace period on mouseleave.
   const artistWrap = document.getElementById('artist-name-wrap');
   let hoverLeaveTimer = null;
 
@@ -394,12 +377,11 @@
       clearTimeout(hoverLeaveTimer);
       hoverLeaveTimer = setTimeout(() => {
         artistWrap.classList.remove('hovered');
-      }, 400); // 400ms grace window prevents menu from snapping shut on quick mouse movement
+      }, 400);
     });
 
-    // Touch / tap toggle for mobile
     function toggleHover(e) {
-      if (e.target.closest('.artist-nav__link')) return; // let nav links fire
+      if (e.target.closest('.artist-nav__link')) return;
       if (e.stopPropagation) e.stopPropagation();
       artistWrap.classList.toggle('hovered');
     }
@@ -411,7 +393,6 @@
       toggleHover(e);
     }, { passive: false });
 
-    // Dismiss when tapping outside
     document.addEventListener('click', (e) => {
       if (!artistWrap.contains(e.target)) {
         clearTimeout(hoverLeaveTimer);
@@ -465,7 +446,6 @@
     });
   }
 
-  // Navigation link click triggers (header ABOUT / CONTACT)
   navLinks.forEach((link) => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
@@ -474,21 +454,14 @@
     });
   });
 
-  // Modal in-card tabs click triggers
   modalTabs.forEach((tab) => {
     tab.addEventListener('click', () => {
       switchModalSection(tab.dataset.target);
     });
   });
 
-  // Close handlers
-  if (modalCloseBtn) {
-    modalCloseBtn.addEventListener('click', closeModal);
-  }
-
-  if (modalBackdrop) {
-    modalBackdrop.addEventListener('click', closeModal);
-  }
+  if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
+  if (modalBackdrop) modalBackdrop.addEventListener('click', closeModal);
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
@@ -496,7 +469,6 @@
     }
   });
 
-  // Open modal if page is loaded with hash #about or #contact
   if (window.location.hash === '#about') {
     openModal('about');
   } else if (window.location.hash === '#contact') {
@@ -538,9 +510,7 @@
 
       fetch('https://formsubmit.co/ajax/cgillis15@gmail.com', {
         method: 'POST',
-        headers: {
-          'Accept': 'application/json'
-        },
+        headers: { 'Accept': 'application/json' },
         body: formData
       })
       .then(async (response) => {
@@ -571,15 +541,13 @@
     });
   }
 
-  // --- Frame style toggle -----------------------------------------------
+  // --- Frame style toggle (Eclectic <-> Modern) -------------------------
   const frameStyleToggle = document.getElementById('frame-style-toggle');
   const frameTooltipEl   = document.getElementById('frame-toggle-tooltip');
   let currentFrameStyle  = 'eclectic';
 
-  // Register tooltip reference with the scroll handler
   setFrameTooltipRef(frameTooltipEl);
 
-  // Show tooltip at top on first load (after header fades in)
   setTimeout(() => {
     if (frameTooltipEl && window.scrollY <= 20) {
       frameTooltipEl.classList.add('visible');
@@ -588,52 +556,67 @@
 
   if (frameStyleToggle) {
     frameStyleToggle.addEventListener('click', () => {
-      // Permanently hide tooltip once user interacts with the button
       markFrameTooltipUsed();
 
       currentFrameStyle = currentFrameStyle === 'eclectic' ? 'modern' : 'eclectic';
       frameStyleToggle.classList.toggle('modern', currentFrameStyle === 'modern');
 
       items.forEach((item, index) => {
-        const post    = sorted[index];
-        const artAspect = post.aspectRatio || 1;
-        const frameImg  = item.el.querySelector('.frame-overlay');
-        const matDiv    = item.el.querySelector('.art-mat');
+        const post     = sorted[index];
+        const wrapDiv  = item.el.querySelector('.art-frame-wrap');
+        const frameImg = item.el.querySelector('.frame-overlay');
+        const matDiv   = item.el.querySelector('.art-mat');
 
-        // Animate: fade out old frame, swap src, fade in new
-        frameImg.style.opacity = '0';
-
-        const delay = index * 30; // stagger each frame by 30ms
+        // Trigger staggered ripple wave animation
+        const staggerDelay = index * 35;
         setTimeout(() => {
-          if (currentFrameStyle === 'modern') {
-            let bestFit = MODERN_FRAMES[0];
-            let bestDiff = Infinity;
-            MODERN_FRAMES.forEach(mf => {
-              const diff = Math.abs(mf.aspectRatio - artAspect);
-              if (diff < bestDiff) { bestDiff = diff; bestFit = mf; }
-            });
-            frameImg.src = `assets/frames/modern frames/${bestFit.filename}`;
-            matDiv.style.top    = `${bestFit.mat.top}%`;
-            matDiv.style.left   = `${bestFit.mat.left}%`;
-            matDiv.style.width  = `${bestFit.mat.width}%`;
-            matDiv.style.height = `${bestFit.mat.height}%`;
-          } else {
-            frameImg.src = `assets/frames/${post.frame}.png`;
-            if (post.mat) {
-              matDiv.style.top    = `${post.mat.top}%`;
-              matDiv.style.left   = `${post.mat.left}%`;
-              matDiv.style.width  = `${post.mat.width}%`;
-              matDiv.style.height = `${post.mat.height}%`;
+          item.el.classList.add('frame-switching');
+
+          // Midway through the morph flip, swap image & mat
+          setTimeout(() => {
+            frameImg.style.opacity = '0';
+
+            if (currentFrameStyle === 'modern' && post.modern) {
+              frameImg.src        = `assets/frames/modern frames/${post.modern.frame}`;
+              matDiv.style.top    = `${post.modern.mat.top}%`;
+              matDiv.style.left   = `${post.modern.mat.left}%`;
+              matDiv.style.width  = `${post.modern.mat.width}%`;
+              matDiv.style.height = `${post.modern.mat.height}%`;
+              item.aspect         = post.modern.aspectRatio || post.aspectRatio;
+              wrapDiv.style.aspectRatio = String(item.aspect);
             } else {
-              matDiv.style.cssText += '; inset: 12%; width: auto; height: auto;';
+              frameImg.src        = `assets/frames/${post.frame}.png`;
+              if (post.mat) {
+                matDiv.style.top    = `${post.mat.top}%`;
+                matDiv.style.left   = `${post.mat.left}%`;
+                matDiv.style.width  = `${post.mat.width}%`;
+                matDiv.style.height = `${post.mat.height}%`;
+              } else {
+                matDiv.style.inset  = '12%';
+              }
+              item.aspect         = post.aspectRatio;
+              wrapDiv.style.aspectRatio = String(item.aspect);
             }
-          }
-          // Fade back in
-          requestAnimationFrame(() => { frameImg.style.opacity = '1'; });
-        }, delay);
+
+            requestAnimationFrame(() => {
+              frameImg.style.opacity = '1';
+            });
+          }, 160);
+
+          // Remove switching class after flip finishes
+          setTimeout(() => {
+            item.el.classList.remove('frame-switching');
+          }, 550);
+        }, staggerDelay);
       });
+
+      // Smoothly re-layout grid to accommodate any subtle modern frame aspect ratio adjustments
+      setTimeout(() => {
+        layout(true);
+      }, 200);
     });
   }
 
 })();
+
 
