@@ -60,19 +60,18 @@
     if (gallery)    gallery.classList.add('visible');
   }, 3900);
 
-  // --- Header scroll fade -----------------------------------------------
-  // Fades toolbar slightly when scrolling down; restores full visibility when scrolling up or at top
+  // --- Header scroll fade & tooltip line state ------------------------
   let lastScrollY = window.scrollY || 0;
   let scrollTicking = false;
 
   // Tooltip state — managed here so scroll handler can access it early
-  let _frameTooltipEl = null;
-  let _frameTooltipUsed = false;
+  let _frameTooltipWrapEl = null;
+  let _frameTooltipUsed   = false;
 
-  function setFrameTooltipRef(el) { _frameTooltipEl = el; }
+  function setFrameTooltipRef(el) { _frameTooltipWrapEl = el; }
   function markFrameTooltipUsed() {
     _frameTooltipUsed = true;
-    if (_frameTooltipEl) _frameTooltipEl.classList.remove('visible');
+    if (_frameTooltipWrapEl) _frameTooltipWrapEl.classList.remove('tooltip-active');
   }
 
   function updateHeaderScroll() {
@@ -82,16 +81,20 @@
     if (siteHeader && siteHeader.classList.contains('visible')) {
       if (currentY <= 20) {
         siteHeader.classList.remove('scrolled-down');
-        if (_frameTooltipEl && !_frameTooltipUsed) {
-          _frameTooltipEl.classList.add('visible');
+        if (_frameTooltipWrapEl && !_frameTooltipUsed) {
+          _frameTooltipWrapEl.classList.add('tooltip-active');
         }
-      } else if (delta > 6 && currentY > 60) {
-        // Scrolling down
-        siteHeader.classList.add('scrolled-down');
-        if (_frameTooltipEl) _frameTooltipEl.classList.remove('visible');
-      } else if (delta < -6) {
-        // Scrolling up
-        siteHeader.classList.remove('scrolled-down');
+      } else {
+        // Scrolled away from top
+        if (_frameTooltipWrapEl) _frameTooltipWrapEl.classList.remove('tooltip-active');
+
+        if (delta > 6 && currentY > 60) {
+          // Scrolling down
+          siteHeader.classList.add('scrolled-down');
+        } else if (delta < -6) {
+          // Scrolling up
+          siteHeader.classList.remove('scrolled-down');
+        }
       }
     }
 
@@ -541,16 +544,87 @@
     });
   }
 
-  // --- Frame style toggle (Eclectic <-> Modern) -------------------------
-  const frameStyleToggle = document.getElementById('frame-style-toggle');
-  const frameTooltipEl   = document.getElementById('frame-toggle-tooltip');
-  let currentFrameStyle  = 'eclectic';
+  // --- Auto-scroll Play Toggle ------------------------------------------
+  const autoScrollBtn = document.getElementById('auto-scroll-toggle');
+  let isAutoScrolling = false;
+  let autoScrollRaf   = null;
 
-  setFrameTooltipRef(frameTooltipEl);
+  function stopAutoScroll() {
+    if (!isAutoScrolling) return;
+    isAutoScrolling = false;
+    if (autoScrollRaf) {
+      cancelAnimationFrame(autoScrollRaf);
+      autoScrollRaf = null;
+    }
+    if (autoScrollBtn) {
+      autoScrollBtn.classList.remove('playing');
+      autoScrollBtn.setAttribute('aria-pressed', 'false');
+      autoScrollBtn.setAttribute('title', 'Play auto-scroll');
+    }
+  }
+
+  function startAutoScroll() {
+    isAutoScrolling = true;
+    if (autoScrollBtn) {
+      autoScrollBtn.classList.add('playing');
+      autoScrollBtn.setAttribute('aria-pressed', 'true');
+      autoScrollBtn.setAttribute('title', 'Pause auto-scroll');
+    }
+
+    const scrollSpeed = 0.75; // pixels per frame at 60fps (very slow, smooth gallery exhibition pace)
+    let lastTime = performance.now();
+
+    function step(now) {
+      if (!isAutoScrolling) return;
+      const dt = Math.min(now - lastTime, 50);
+      lastTime = now;
+
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      if (window.scrollY >= maxScroll - 2) {
+        stopAutoScroll();
+        return;
+      }
+
+      window.scrollBy(0, (scrollSpeed * dt) / 16.67);
+      autoScrollRaf = requestAnimationFrame(step);
+    }
+
+    autoScrollRaf = requestAnimationFrame(step);
+  }
+
+  if (autoScrollBtn) {
+    autoScrollBtn.addEventListener('click', () => {
+      if (isAutoScrolling) {
+        stopAutoScroll();
+      } else {
+        startAutoScroll();
+      }
+    });
+
+    // Pause auto-scroll gracefully on manual user interaction
+    window.addEventListener('wheel', (e) => {
+      if (isAutoScrolling && Math.abs(e.deltaY) > 4) stopAutoScroll();
+    }, { passive: true });
+    window.addEventListener('touchmove', () => {
+      if (isAutoScrolling) stopAutoScroll();
+    }, { passive: true });
+    window.addEventListener('keydown', (e) => {
+      if (isAutoScrolling && ['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space'].includes(e.code)) {
+        stopAutoScroll();
+      }
+    });
+  }
+
+  // --- Frame style toggle (Eclectic <-> Modern) -------------------------
+  const frameStyleToggle   = document.getElementById('frame-style-toggle');
+  const frameToggleWrapEl  = document.getElementById('frame-toggle-wrap');
+  let currentFrameStyle    = 'eclectic';
+
+  setFrameTooltipRef(frameToggleWrapEl);
 
   setTimeout(() => {
-    if (frameTooltipEl && window.scrollY <= 20) {
-      frameTooltipEl.classList.add('visible');
+    if (frameToggleWrapEl && window.scrollY <= 20) {
+      frameToggleWrapEl.classList.add('tooltip-active');
     }
   }, 4100);
 

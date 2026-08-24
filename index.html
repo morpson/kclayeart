@@ -116,23 +116,34 @@
     <!-- Right: layout controls + theme toggle -->
     <div class="header-controls">
 
+      <!-- Auto-scroll play toggle button -->
+      <button id="auto-scroll-toggle" class="scroll-play-btn" aria-label="Auto-scroll gallery" title="Auto-scroll gallery">
+        <svg class="icon-play" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <polygon points="6 3 20 12 6 21 6 3"/>
+        </svg>
+        <svg class="icon-pause" width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <rect x="5" y="4" width="4.5" height="16" rx="1"/>
+          <rect x="14.5" y="4" width="4.5" height="16" rx="1"/>
+        </svg>
+      </button>
+
       <nav class="sort-controls" aria-label="Gallery layout">
         <!-- 1 column (default) -->
         <button class="sort-btn active" data-layout="1col" aria-pressed="true" title="Single column">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <rect x="3" y="1" width="10" height="14" rx="0.75" fill="currentColor"/>
           </svg>
         </button>
         <!-- 2 columns -->
         <button class="sort-btn" data-layout="2col" aria-pressed="false" title="2 columns">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <rect x="1.5" y="1" width="5.5" height="14" rx="0.75" fill="currentColor"/>
             <rect x="9"   y="1" width="5.5" height="14" rx="0.75" fill="currentColor"/>
           </svg>
         </button>
         <!-- 3 columns -->
         <button class="sort-btn" data-layout="3col" aria-pressed="false" title="3 columns">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <rect x="1"   y="1" width="3.8" height="14" rx="0.75" fill="currentColor"/>
             <rect x="6.1" y="1" width="3.8" height="14" rx="0.75" fill="currentColor"/>
             <rect x="11.2" y="1" width="3.8" height="14" rx="0.75" fill="currentColor"/>
@@ -140,9 +151,9 @@
         </button>
       </nav>
 
-      <div class="frame-toggle-wrap">
+      <div class="frame-toggle-wrap" id="frame-toggle-wrap">
         <button id="frame-style-toggle" class="frame-style-toggle" aria-label="Toggle frame style" title="Toggle frame style">
-          <svg class="icon-palette" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg class="icon-palette" xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="13.5" cy="6.5" r="1.5" fill="currentColor"></circle>
             <circle cx="17.5" cy="10.5" r="1.5" fill="currentColor"></circle>
             <circle cx="8.5" cy="7.5" r="1.5" fill="currentColor"></circle>
@@ -150,11 +161,17 @@
             <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
           </svg>
         </button>
+        
+        <!-- Animated drawing line connecting toolbar to tooltip box -->
+        <svg class="tooltip-line-svg" viewBox="0 0 200 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path class="tooltip-line-path" d="M 0,14 L 100,14 L 100,28 L 138,28 Q 142,28 142,32 L 142,44 Q 142,48 138,48 L 62,48 Q 58,48 58,44 L 58,32 Q 58,28 62,28 L 100,28" />
+        </svg>
+
         <div id="frame-toggle-tooltip" class="frame-toggle-tooltip" aria-hidden="true">Change the view</div>
       </div>
 
       <button id="theme-toggle" class="theme-toggle" aria-label="Toggle light / dark mode" title="Toggle light / dark mode">
-        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="15" height="15"
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="13" height="13"
              viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="5"/>
@@ -167,7 +184,7 @@
           <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
           <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
         </svg>
-        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="15" height="15"
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="13" height="13"
              viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
