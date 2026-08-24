@@ -65,6 +65,16 @@
   let lastScrollY = window.scrollY || 0;
   let scrollTicking = false;
 
+  // Tooltip state — managed here so scroll handler can access it early
+  let _frameTooltipEl = null;
+  let _frameTooltipUsed = false;
+
+  function setFrameTooltipRef(el) { _frameTooltipEl = el; }
+  function markFrameTooltipUsed() {
+    _frameTooltipUsed = true;
+    if (_frameTooltipEl) _frameTooltipEl.classList.remove('visible');
+  }
+
   function updateHeaderScroll() {
     const currentY = window.scrollY || 0;
     const delta = currentY - lastScrollY;
@@ -72,15 +82,13 @@
     if (siteHeader && siteHeader.classList.contains('visible')) {
       if (currentY <= 20) {
         siteHeader.classList.remove('scrolled-down');
-        if (typeof frameTooltip !== 'undefined' && frameTooltip && !frameTooltipHiddenPermanently) {
-          frameTooltip.classList.add('visible');
+        if (_frameTooltipEl && !_frameTooltipUsed) {
+          _frameTooltipEl.classList.add('visible');
         }
       } else if (delta > 6 && currentY > 60) {
         // Scrolling down
         siteHeader.classList.add('scrolled-down');
-        if (typeof frameTooltip !== 'undefined' && frameTooltip) {
-          frameTooltip.classList.remove('visible');
-        }
+        if (_frameTooltipEl) _frameTooltipEl.classList.remove('visible');
       } else if (delta < -6) {
         // Scrolling up
         siteHeader.classList.remove('scrolled-down');
@@ -212,28 +220,40 @@
 
     const heights = new Array(cols).fill(tp);
 
-    if (!animate) gallery.classList.add('resizing');
-
-    items.forEach((item) => {
-      const link   = item.el;
+    // Compute target positions first
+    const targets = items.map((item) => {
       const aspect = item.aspect || 1;
       const itemH  = cw / aspect;
-
-      link.style.width  = `${cw}px`;
-      link.style.height = `${itemH}px`;
-
       const minH   = Math.min(...heights);
       const colIdx = heights.indexOf(minH);
       const x      = lp + singleColOffset + colIdx * (cw + gap);
       const y      = minH;
-
-      link.style.transform = `translate3d(${x}px, ${y}px, 0)`;
       heights[colIdx] += itemH + gap;
+      return { link: item.el, cw, itemH, x, y };
     });
 
-    gallery.style.height = `${Math.max(...heights) - gap + bp}px`;
+    const totalH = `${Math.max(...heights) - gap + bp}px`;
 
-    if (!animate) {
+    if (animate) {
+      // Smooth animated rearrange: remove resizing class and let CSS transitions fire
+      gallery.classList.remove('resizing');
+      requestAnimationFrame(() => {
+        targets.forEach(({ link, cw, itemH, x, y }) => {
+          link.style.width     = `${cw}px`;
+          link.style.height    = `${itemH}px`;
+          link.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        });
+        gallery.style.height = totalH;
+      });
+    } else {
+      // Instant snap (resize / init): suppress transitions temporarily
+      gallery.classList.add('resizing');
+      targets.forEach(({ link, cw, itemH, x, y }) => {
+        link.style.width     = `${cw}px`;
+        link.style.height    = `${itemH}px`;
+        link.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      });
+      gallery.style.height = totalH;
       requestAnimationFrame(() =>
         requestAnimationFrame(() => gallery.classList.remove('resizing'))
       );
@@ -259,8 +279,7 @@
       localStorage.setItem('kc-layout-tier', manualOverrideTier);
     }
     updateButtonUI();
-    // Use animate=true for smooth re-arranging when manually triggered
-    layout(isManual);
+    layout(isManual); // isManual=true → animated; auto/resize → snap
   }
 
   // Wire up buttons
@@ -554,55 +573,64 @@
 
   // --- Frame style toggle -----------------------------------------------
   const frameStyleToggle = document.getElementById('frame-style-toggle');
-  const frameTooltip = document.getElementById('frame-toggle-tooltip');
-  let currentFrameStyle = 'eclectic';
-  window.frameTooltipHiddenPermanently = false;
+  const frameTooltipEl   = document.getElementById('frame-toggle-tooltip');
+  let currentFrameStyle  = 'eclectic';
+
+  // Register tooltip reference with the scroll handler
+  setFrameTooltipRef(frameTooltipEl);
+
+  // Show tooltip at top on first load (after header fades in)
+  setTimeout(() => {
+    if (frameTooltipEl && window.scrollY <= 20) {
+      frameTooltipEl.classList.add('visible');
+    }
+  }, 4100);
 
   if (frameStyleToggle) {
     frameStyleToggle.addEventListener('click', () => {
-      window.frameTooltipHiddenPermanently = true;
-      if (frameTooltip) frameTooltip.classList.remove('visible');
+      // Permanently hide tooltip once user interacts with the button
+      markFrameTooltipUsed();
 
       currentFrameStyle = currentFrameStyle === 'eclectic' ? 'modern' : 'eclectic';
       frameStyleToggle.classList.toggle('modern', currentFrameStyle === 'modern');
 
       items.forEach((item, index) => {
-        const post = sorted[index];
+        const post    = sorted[index];
         const artAspect = post.aspectRatio || 1;
-        const frameImg = item.el.querySelector('.frame-overlay');
-        const matDiv = item.el.querySelector('.art-mat');
+        const frameImg  = item.el.querySelector('.frame-overlay');
+        const matDiv    = item.el.querySelector('.art-mat');
 
-        if (currentFrameStyle === 'modern') {
-          let bestFit = MODERN_FRAMES[0];
-          let bestDiff = Infinity;
+        // Animate: fade out old frame, swap src, fade in new
+        frameImg.style.opacity = '0';
 
-          MODERN_FRAMES.forEach(mf => {
-            const diff = Math.abs(mf.aspectRatio - artAspect);
-            if (diff < bestDiff) {
-              bestDiff = diff;
-              bestFit = mf;
-            }
-          });
-
-          frameImg.src = `assets/frames/modern frames/${bestFit.filename}`;
-          matDiv.style.top = `${bestFit.mat.top}%`;
-          matDiv.style.left = `${bestFit.mat.left}%`;
-          matDiv.style.width = `${bestFit.mat.width}%`;
-          matDiv.style.height = `${bestFit.mat.height}%`;
-        } else {
-          // Revert to eclectic
-          frameImg.src = `assets/frames/${post.frame}.png`;
-          if (post.mat) {
-            matDiv.style.top = `${post.mat.top}%`;
-            matDiv.style.left = `${post.mat.left}%`;
-            matDiv.style.width = `${post.mat.width}%`;
-            matDiv.style.height = `${post.mat.height}%`;
+        const delay = index * 30; // stagger each frame by 30ms
+        setTimeout(() => {
+          if (currentFrameStyle === 'modern') {
+            let bestFit = MODERN_FRAMES[0];
+            let bestDiff = Infinity;
+            MODERN_FRAMES.forEach(mf => {
+              const diff = Math.abs(mf.aspectRatio - artAspect);
+              if (diff < bestDiff) { bestDiff = diff; bestFit = mf; }
+            });
+            frameImg.src = `assets/frames/modern frames/${bestFit.filename}`;
+            matDiv.style.top    = `${bestFit.mat.top}%`;
+            matDiv.style.left   = `${bestFit.mat.left}%`;
+            matDiv.style.width  = `${bestFit.mat.width}%`;
+            matDiv.style.height = `${bestFit.mat.height}%`;
           } else {
-            matDiv.style.inset = '12%';
-            matDiv.style.width = 'auto';
-            matDiv.style.height = 'auto';
+            frameImg.src = `assets/frames/${post.frame}.png`;
+            if (post.mat) {
+              matDiv.style.top    = `${post.mat.top}%`;
+              matDiv.style.left   = `${post.mat.left}%`;
+              matDiv.style.width  = `${post.mat.width}%`;
+              matDiv.style.height = `${post.mat.height}%`;
+            } else {
+              matDiv.style.cssText += '; inset: 12%; width: auto; height: auto;';
+            }
           }
-        }
+          // Fade back in
+          requestAnimationFrame(() => { frameImg.style.opacity = '1'; });
+        }, delay);
       });
     });
   }
