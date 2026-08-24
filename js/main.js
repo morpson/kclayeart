@@ -400,10 +400,16 @@
   const modalSections = document.querySelectorAll('.glass-modal__section');
   const navLinks      = document.querySelectorAll('.artist-nav__link');
   const maiseyVideo   = document.getElementById('maisey-walk-video');
+  let maiseyLoopTimer = null;
 
   function triggerMaiseyWalk() {
+    if (maiseyLoopTimer) {
+      clearTimeout(maiseyLoopTimer);
+      maiseyLoopTimer = null;
+    }
     if (maiseyVideo) {
       try {
+        maiseyVideo.style.opacity = '1';
         maiseyVideo.currentTime = 0;
         const playPromise = maiseyVideo.play();
         if (playPromise !== undefined) {
@@ -414,11 +420,28 @@
   }
 
   function pauseMaiseyWalk() {
+    if (maiseyLoopTimer) {
+      clearTimeout(maiseyLoopTimer);
+      maiseyLoopTimer = null;
+    }
     if (maiseyVideo) {
       try {
         maiseyVideo.pause();
       } catch (err) {}
     }
+  }
+
+  if (maiseyVideo) {
+    maiseyVideo.addEventListener('ended', () => {
+      // Fade out gently after completing walk
+      maiseyVideo.style.opacity = '0';
+      // Wait for a calm 7-second pause before starting next walk cycle
+      maiseyLoopTimer = setTimeout(() => {
+        if (modal && modal.classList.contains('active')) {
+          triggerMaiseyWalk();
+        }
+      }, 7000);
+    });
   }
 
   function openModal(sectionName) {
