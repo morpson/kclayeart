@@ -861,7 +861,7 @@
     if (!isAutoScrolling) return;
     isAutoScrolling = false;
     document.body.classList.remove('is-autoscrolling');
-    if (siteHeader) siteHeader.classList.remove('auto-scrolling');
+    if (siteHeader) siteHeader.classList.remove('auto-scrolling', 'scrolled-down');
     if (autoScrollRaf) {
       cancelAnimationFrame(autoScrollRaf);
       autoScrollRaf = null;
@@ -879,7 +879,7 @@
     autoScrollStartTime = Date.now();
 
     document.body.classList.add('is-autoscrolling');
-    if (siteHeader) siteHeader.classList.add('auto-scrolling');
+    if (siteHeader) siteHeader.classList.add('auto-scrolling', 'scrolled-down');
 
     // Immediately close both menus when PLAY starts
     closeBothMenus(0);
