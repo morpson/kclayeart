@@ -1,13 +1,18 @@
 [build]
   publish = "."
-  command = ""
+  command = "node build.js"
 
-# Cache static assets aggressively
+# HTML pages — always revalidate so browsers pick up new asset hashes.
+# Safari in particular caches aggressively, so no-cache + no-store is safest.
 [[headers]]
-  for = "/assets/*"
+  for = "/*.html"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
 
+# JS and CSS — versioned by content hash in the query string,
+# so long-lived caching is safe. Browsers will only request a
+# new copy when the ?v=<hash> changes in index.html.
 [[headers]]
   for = "/css/*"
   [headers.values]
@@ -15,6 +20,13 @@
 
 [[headers]]
   for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Static assets (images, fonts, etc.) — cache aggressively.
+# These rarely change and are not query-string versioned.
+[[headers]]
+  for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
