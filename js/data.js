@@ -4,20 +4,6 @@
 
 const POSTS_DATA = [
   {
-    "filename": "2026-08-30_23-58-32_utc_1.jpg",
-    "url": "https://www.instagram.com/p/DcrvxivlO6B/",
-    "likes": 47,
-    "subject": "architecture",
-    "frame": "frame-landscape-classic",
-    "aspectRatio": 1.1278,
-    "mat": { "top": 27.63, "left": 22.33, "width": 55.42, "height": 45.21 },
-    "modern": {
-      "frame": "modern_frame20.PNG",
-      "aspectRatio": 1.2723,
-      "mat": { "top": 17.81, "left": 14.7, "width": 70.9, "height": 64.25 }
-    }
-  },
-  {
     "filename": "2025-12-24_18-35-41_utc_1.jpg",
     "url": "https://www.instagram.com/p/DSqA5IED9PF/",
     "likes": 45,
@@ -29,6 +15,20 @@ const POSTS_DATA = [
       "frame": "modern_frame2.PNG",
       "aspectRatio": 0.738,
       "mat": { "top": 10.6, "left": 14.23, "width": 72.09, "height": 79.2 }
+    }
+  },
+  {
+    "filename": "2026-08-30_23-58-32_utc_1.jpg",
+    "url": "https://www.instagram.com/p/DcrvxivlO6B/",
+    "likes": 47,
+    "subject": "architecture",
+    "frame": "frame-landscape-classic",
+    "aspectRatio": 1.1278,
+    "mat": { "top": 27.63, "left": 22.33, "width": 55.42, "height": 45.21 },
+    "modern": {
+      "frame": "modern_frame20.PNG",
+      "aspectRatio": 1.2723,
+      "mat": { "top": 17.81, "left": 14.7, "width": 70.9, "height": 64.25 }
     }
   },
   {
