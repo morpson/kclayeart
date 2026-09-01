@@ -46,7 +46,7 @@ html {
 body {
   background-color: var(--bg);
   color: var(--text);
-  font-family: 'Playfair Display', 'Georgia', serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   min-height: 100vh;
   transition: background-color 0.6s ease, color 0.6s ease;
   overflow-x: hidden;
@@ -66,10 +66,13 @@ body {
 }
 
 .intro-text {
+  font-family: 'Glook', 'Georgia', serif;
   font-size: clamp(2rem, 6vw, 5rem);
   font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+  -webkit-text-stroke: 0.7px currentColor;
+  paint-order: stroke fill;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
   white-space: nowrap;
 }
 
@@ -98,14 +101,69 @@ body {
   right: 0;
   z-index: 6000;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 18px 24px;
+  padding: 14px 28px calc(12px + env(safe-area-inset-top, 0px));
+  padding-top: calc(14px + env(safe-area-inset-top, 0px));
   pointer-events: none;     /* block clicks until visible */
   opacity: 0;
   transform: translateY(0);
   transition: opacity 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
               transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Single unified edge-to-edge morphing glass blur bar spanning across top */
+.site-header__static-glass {
+  position: absolute;
+  top: -20px;
+  left: -40px;
+  right: -40px;
+  height: calc(110px + env(safe-area-inset-top, 0px));
+  z-index: 0;
+  pointer-events: none;
+  background: rgba(250, 250, 250, 0.58);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+  transition: height 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+              border-radius 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.5s ease,
+              border-color 0.5s ease,
+              box-shadow 0.38s ease;
+}
+
+[data-theme="dark"] .site-header__static-glass {
+  background: rgba(8, 8, 8, 0.65);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.45);
+}
+
+/* Single glass bar morphing downwards when either/both menus are open */
+.site-header.menu-open .site-header__static-glass,
+.site-header.menu-left-open .site-header__static-glass,
+.site-header.menu-right-open .site-header__static-glass,
+.site-header:has(#artist-name-wrap:hover) .site-header__static-glass,
+.site-header:has(#right-menu-wrap:hover) .site-header__static-glass,
+.site-header:has(#artist-name-wrap.hovered) .site-header__static-glass,
+.site-header:has(#right-menu-wrap.hovered) .site-header__static-glass {
+  height: calc(204px + env(safe-area-inset-top, 0px));
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  box-shadow: 0 12px 38px rgba(0, 0, 0, 0.07);
+}
+
+[data-theme="dark"].site-header.menu-open .site-header__static-glass,
+[data-theme="dark"] .site-header.menu-open .site-header__static-glass,
+[data-theme="dark"] .site-header.menu-left-open .site-header__static-glass,
+[data-theme="dark"] .site-header.menu-right-open .site-header__static-glass,
+[data-theme="dark"] .site-header:has(#artist-name-wrap:hover) .site-header__static-glass,
+[data-theme="dark"] .site-header:has(#right-menu-wrap:hover) .site-header__static-glass,
+[data-theme="dark"] .site-header:has(#artist-name-wrap.hovered) .site-header__static-glass,
+[data-theme="dark"] .site-header:has(#right-menu-wrap.hovered) .site-header__static-glass {
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
 }
 
 .site-header.visible {
@@ -115,19 +173,14 @@ body {
 
 /* Faded state when scrolling down — slightly ghosts to keep art in focus */
 .site-header.visible.scrolled-down {
-  opacity: 0.22;
-  transform: translateY(-2px);
+  opacity: 0.18;
 }
 
-/* Restores full visibility instantly on hover or keyboard focus */
-.site-header.visible.scrolled-down:hover,
-.site-header.visible.scrolled-down:focus-within {
+.site-header.visible.scrolled-down:hover {
   opacity: 1;
-  transform: translateY(0);
 }
 
-/* ---------- Touch-hint overlay ---------- */
-/* Sits above gallery but below header; appears after intro, fades out */
+/* ---------- Touch-hint overlay (Modern minimalist gallery card) ---------- */
 .touch-hint {
   position: fixed;
   inset: 0;
@@ -136,197 +189,100 @@ body {
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  /* Hidden initially; JS adds .visible after intro, then .fadeout to dismiss */
   opacity: 0;
-  backdrop-filter: blur(0px);
-  -webkit-backdrop-filter: blur(0px);
-  background-color: rgba(250, 250, 250, 0);
-  transition: opacity 0.6s ease,
-              backdrop-filter 0.6s ease,
-              -webkit-backdrop-filter 0.6s ease,
-              background-color 0.6s ease;
+  transition: opacity 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .touch-hint.visible {
   opacity: 1;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  background-color: rgba(250, 250, 250, 0.4);
-}
-
-[data-theme="dark"] .touch-hint.visible {
-  background-color: rgba(8, 8, 8, 0.5);
 }
 
 .touch-hint.fadeout {
   opacity: 0;
-  backdrop-filter: blur(0px);
-  -webkit-backdrop-filter: blur(0px);
-  background-color: rgba(250, 250, 250, 0);
-  transition: opacity 0.8s ease,
-              backdrop-filter 0.8s ease,
-              -webkit-backdrop-filter 0.8s ease,
-              background-color 0.8s ease;
+  transition: opacity 0.75s ease;
 }
 
-/* Stage (220×220 scaled down container) */
-.touch-hint__stage {
+/* Floating frosted glass pill */
+.touch-hint__card {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  transform: translateY(8px) scale(0.96);
+  animation: touch-card-enter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+[data-theme="dark"] .touch-hint__card {
+  background: rgba(20, 20, 24, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+.touch-hint__icon-wrap {
   position: relative;
-  width: 220px;
-  height: 220px;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--text);
 }
 
-/* Ambient glow behind glass */
-.touch-hint__ambient-glow {
+.touch-hint__frame-icon {
+  opacity: 0.9;
+  display: block;
+}
+
+.touch-hint__tap-dot {
   position: absolute;
-  width: 110px;
-  height: 110px;
-  background: rgba(255,255,255,0.12);
-  filter: blur(30px);
+  bottom: -2px;
+  right: -2px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  z-index: 0;
+  background: var(--text);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Glassmorphic circle */
-.touch-hint__glass-circle {
+[data-theme="dark"] .touch-hint__tap-dot {
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+.touch-hint__tap-ripple {
   position: absolute;
-  width: 180px;
-  height: 180px;
+  bottom: -6px;
+  right: -6px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.04);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.15);
-  box-shadow:
-    0 20px 40px rgba(0,0,0,0.45),
-    inset 0 1px 1px rgba(255,255,255,0.25);
-  z-index: 1;
-  animation: touch-hint-pulse 6s ease-in-out infinite alternate;
-}
-
-[data-theme="light"] .touch-hint__glass-circle {
-  background: rgba(0,0,0,0.04);
-  border-color: rgba(0,0,0,0.12);
-  box-shadow:
-    0 20px 40px rgba(0,0,0,0.15),
-    inset 0 1px 1px rgba(255,255,255,0.6);
-}
-
-/* Painting wrapper */
-.touch-hint__painting-wrapper {
-  position: relative;
-  width: 105px;
-  height: 133px;
-  transform-origin: 40% 70%;
-  transform: rotate(-4deg);
-  z-index: 2;
-  animation: touch-hint-bounce 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
-
-.touch-hint__ornate-svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 12px 20px rgba(0,0,0,0.75));
-}
-
-/* Tap ripple ring */
-.touch-hint__ripple {
-  position: absolute;
-  top: 60%;
-  left: 65%;
-  width: 10px;
-  height: 10px;
-  border: 1.5px solid #ffffff;
-  border-radius: 50%;
-  transform: translate(-50%, -50%) scale(0);
+  border: 1.5px solid var(--text);
   opacity: 0;
-  z-index: 4;
-  animation: touch-hint-ripple 3s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  animation: touch-beacon 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
 }
 
-[data-theme="light"] .touch-hint__ripple {
-  border-color: #111;
+.touch-hint__text {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: lowercase;
+  color: var(--text);
+  white-space: nowrap;
 }
 
-/* Pointing hand cursor */
-.touch-hint__cursor-hand {
-  position: absolute;
-  top: 58%;
-  left: 62%;
-  width: 50px;
-  height: 50px;
-  z-index: 5;
-  transform-origin: top left;
-  animation: touch-hint-hand 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+@keyframes touch-card-enter {
+  0%   { opacity: 0; transform: translateY(12px) scale(0.94); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.touch-hint__hand-symbol {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.7));
-}
-
-/* Touch-hint keyframes */
-@keyframes touch-hint-hand {
-  0%, 100% {
-    transform: translate(35px, 35px) rotate(15deg) scale(0.95);
-    opacity: 0.7;
-  }
-  38% {
-    transform: translate(0px, 0px) rotate(0deg) scale(1);
-    opacity: 1;
-  }
-  44% {
-    transform: translate(-2px, -2px) rotate(-3deg) scale(0.9);
-  }
-  56% {
-    transform: translate(0px, 0px) rotate(0deg) scale(1);
-  }
-  80% {
-    transform: translate(35px, 35px) rotate(15deg) scale(0.95);
-    opacity: 0.7;
-  }
-}
-
-@keyframes touch-hint-bounce {
-  0%, 38%, 75%, 100% {
-    transform: rotate(-4deg) scale(1);
-  }
-  44% {
-    transform: rotate(-2deg) scale(0.96);
-  }
-  52% {
-    transform: rotate(-5deg) scale(1.02);
-  }
-  62% {
-    transform: rotate(-4deg) scale(1);
-  }
-}
-
-@keyframes touch-hint-ripple {
-  0%, 42% {
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0;
-  }
-  44% {
-    opacity: 1;
-  }
-  65% {
-    transform: translate(-50%, -50%) scale(5);
-    opacity: 0;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes touch-hint-pulse {
-  0%   { transform: scale(1); }
-  100% { transform: scale(1.02); }
+@keyframes touch-beacon {
+  0%   { transform: scale(0.4); opacity: 0.9; }
+  60%  { transform: scale(2.2); opacity: 0; }
+  100% { transform: scale(2.2); opacity: 0; }
 }
 
 /* ---------- Artist-name block (top-left) ---------- */
@@ -335,26 +291,13 @@ body {
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: center;
+  justify-content: flex-start;
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  padding: 4px 12px 14px 0;
-  min-height: 48px;
-}
-
-/* ---------- Artist-name block (top-left) ---------- */
-.artist-name-wrap {
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  cursor: pointer;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  padding: 4px 12px 14px 0;
-  min-height: 48px;
+  padding: 4px 12px 10px 0;
+  min-height: 44px;
+  z-index: 10;
 }
 
 /* Invisible hover bridge extending down to cover the entire menu area */
@@ -362,9 +305,9 @@ body {
   content: '';
   position: absolute;
   top: 0;
-  left: -8px;
-  right: -24px;
-  bottom: -60px;
+  left: -12px;
+  right: -30px;
+  bottom: -130px;
   pointer-events: auto;
   z-index: 0;
 }
@@ -374,10 +317,13 @@ body {
   position: relative;
   z-index: 2;
   display: block;
-  font-size: clamp(1.18rem, 2.2vw, 1.48rem);
-  font-weight: 800;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
+  font-family: 'Glook', 'Georgia', serif;
+  font-size: clamp(1.2rem, 2.3vw, 1.5rem);
+  font-weight: 700;
+  -webkit-text-stroke: 0.65px currentColor;
+  paint-order: stroke fill;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
   color: var(--text);
   opacity: 1;
   -webkit-font-smoothing: antialiased;
@@ -386,18 +332,19 @@ body {
   transition: opacity 0.25s ease, color 0.6s ease;
   white-space: nowrap;
   user-select: none;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 .artist-name-wrap:hover .artist-name,
-.artist-name-wrap.hovered .artist-name {
+.artist-name-wrap.hovered .artist-name,
+.site-header.menu-open .artist-name {
   opacity: 1;
 }
 
 /* Nav container */
 .artist-nav {
   position: absolute;
-  top: calc(100% - 6px);
+  top: 42px;
   left: 0;
   width: auto;
   min-width: 150px;
@@ -407,7 +354,9 @@ body {
 }
 
 .artist-name-wrap:hover .artist-nav,
-.artist-name-wrap.hovered .artist-nav {
+.artist-name-wrap.hovered .artist-nav,
+.right-menu-wrap:hover ~ .artist-name-wrap .artist-nav,
+.site-header.menu-open .artist-nav {
   pointer-events: auto;
 }
 
@@ -417,25 +366,25 @@ body {
   top: 0;
   left: 0;
   display: inline-block;
-  font-family: 'Playfair Display', 'Georgia', serif;
-  font-size: clamp(0.88rem, 1.6vw, 1.08rem);
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(1.05rem, 1.9vw, 1.25rem);
+  font-weight: 300;
+  letter-spacing: 0;
+  text-transform: lowercase;
   text-decoration: none;
   color: var(--text);
   white-space: nowrap;
-  line-height: 1.2;
+  line-height: 1.15;
   opacity: 0;
   filter: blur(4px);
   transform: translateX(-10px);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  padding: 3px 6px;
-  border-radius: 4px;
+  padding: 2px 4px;
+  border-radius: 6px;
   cursor: pointer;
   /* Smoothly transition when hovered or tapped */
-  transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+  transition: top 0.28s cubic-bezier(0.4, 0, 0.2, 1),
               color 0.3s ease,
               opacity 0.3s ease,
               filter 0.3s ease,
@@ -453,8 +402,8 @@ body {
 
 @keyframes kc-cycle-contact {
   0%   { opacity: 0;   transform: translateX(-10px); filter: blur(3px); }
-  8%   { opacity: 0.9; transform: translateX(0);     filter: blur(0);   }
-  43%  { opacity: 0.9; transform: translateX(0);     filter: blur(0);   }
+  8%   { opacity: 0.95; transform: translateX(0);    filter: blur(0);   }
+  43%  { opacity: 0.95; transform: translateX(0);    filter: blur(0);   }
   49%  { opacity: 0;   transform: translateX(10px);  filter: blur(3px); }
   50%, 100% { opacity: 0; transform: translateX(10px); filter: blur(3px); }
 }
@@ -462,33 +411,41 @@ body {
 @keyframes kc-cycle-about {
   0%, 50%   { opacity: 0;   transform: translateX(-10px); filter: blur(3px); }
   51%       { opacity: 0;   transform: translateX(-10px); filter: blur(3px); }
-  59%       { opacity: 0.9; transform: translateX(0);     filter: blur(0);   }
-  93%       { opacity: 0.9; transform: translateX(0);     filter: blur(0);   }
+  59%       { opacity: 0.95; transform: translateX(0);    filter: blur(0);   }
+  93%       { opacity: 0.95; transform: translateX(0);    filter: blur(0);   }
   99%, 100% { opacity: 0;   transform: translateX(10px);  filter: blur(3px); }
 }
 
-/* ── Hover / .hovered state ──────────────────────────────────────── */
+/* ── Synchronized Hover / Open state — both menus open together ─── */
 .artist-name-wrap:hover .artist-nav__link,
-.artist-name-wrap.hovered .artist-nav__link {
+.artist-name-wrap.hovered .artist-nav__link,
+.site-header.menu-open .artist-nav__link,
+.site-header:has(#right-menu-wrap:hover) .artist-nav__link,
+.site-header:has(#artist-name-wrap:hover) .artist-nav__link {
   animation: none !important; /* stop cycle completely to override transform/filter */
-  opacity: 0.85;
+  opacity: 0.95;
   filter: blur(0);
   transform: translateX(0);
 }
 
 .artist-name-wrap:hover .artist-nav__contact,
-.artist-name-wrap.hovered .artist-nav__contact {
-  top: 26px; /* Stack distinctly below ABOUT */
+.artist-name-wrap.hovered .artist-nav__contact,
+.site-header.menu-open .artist-nav__contact,
+.site-header:has(#right-menu-wrap:hover) .artist-nav__contact,
+.site-header:has(#artist-name-wrap:hover) .artist-nav__contact {
+  top: 34px; /* Stack distinctly below about with clean line spacing */
 }
 
 .artist-name-wrap:hover .artist-nav__about,
-.artist-name-wrap.hovered .artist-nav__about {
+.artist-name-wrap.hovered .artist-nav__about,
+.site-header.menu-open .artist-nav__about,
+.site-header:has(#right-menu-wrap:hover) .artist-nav__about,
+.site-header:has(#artist-name-wrap:hover) .artist-nav__about {
   top: 0px;
 }
 
-.artist-name-wrap:hover .artist-nav__link:hover,
-.artist-name-wrap.hovered .artist-nav__link:hover {
-  opacity: 1;
+.artist-nav__link:hover {
+  opacity: 1 !important;
   text-shadow: 0 0 12px currentColor;
 }
 
@@ -540,12 +497,13 @@ body {
   display: inline-flex;
   flex-direction: column;
   align-items: flex-end;
-  justify-content: center;
+  justify-content: flex-start;
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  padding: 4px 0 14px 12px;
-  min-height: 48px;
+  padding: 4px 0 10px 12px;
+  min-height: 44px;
+  z-index: 10;
 }
 
 /* Hover bridge extending down (mirrors left ::after) */
@@ -553,23 +511,25 @@ body {
   content: '';
   position: absolute;
   top: 0;
-  right: -8px;
-  left: -24px;
-  bottom: -60px;
+  right: -12px;
+  left: -30px;
+  bottom: -160px;
   pointer-events: auto;
   z-index: 0;
 }
 
-/* "MENU" label — mirrors .artist-name */
+/* "menu" label — mirrors .artist-name */
 .right-menu-label {
   position: relative;
   z-index: 2;
   display: block;
-  font-family: 'Playfair Display', 'Georgia', serif;
-  font-size: clamp(1.18rem, 2.2vw, 1.48rem);
-  font-weight: 800;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
+  font-family: 'Glook', 'Georgia', serif;
+  font-size: clamp(1.2rem, 2.3vw, 1.5rem);
+  font-weight: 700;
+  -webkit-text-stroke: 0.65px currentColor;
+  paint-order: stroke fill;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
   color: var(--text);
   opacity: 1;
   -webkit-font-smoothing: antialiased;
@@ -578,17 +538,17 @@ body {
   transition: opacity 0.25s ease, color 0.6s ease;
   white-space: nowrap;
   user-select: none;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 /* Nav dropdown — mirrors .artist-nav */
 .right-menu-nav {
   position: absolute;
-  top: calc(100% - 6px);
+  top: 42px;
   right: 0;
   width: auto;
   min-width: 120px;
-  height: 116px;   /* 4 items × ~26px + gaps */
+  height: 144px;   /* 4 items × ~34px + gaps */
   pointer-events: none;
   z-index: 2;
   display: flex;
@@ -598,7 +558,8 @@ body {
 }
 
 .right-menu-wrap:hover .right-menu-nav,
-.right-menu-wrap.hovered .right-menu-nav {
+.right-menu-wrap.hovered .right-menu-nav,
+.site-header.menu-open .right-menu-nav {
   pointer-events: auto;
 }
 
@@ -607,26 +568,26 @@ body {
   position: absolute;
   right: 0;
   display: inline-block;
-  font-family: 'Playfair Display', 'Georgia', serif;
-  font-size: clamp(0.88rem, 1.6vw, 1.08rem);
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: clamp(1.05rem, 1.9vw, 1.25rem);
+  font-weight: 300;
+  letter-spacing: 0;
+  text-transform: lowercase;
   text-decoration: none;
   background: none;
   border: none;
   color: var(--text);
   white-space: nowrap;
-  line-height: 1.2;
+  line-height: 1.35;
   opacity: 0;
   filter: blur(4px);
   transform: translateX(10px);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  padding: 3px 6px;
-  border-radius: 4px;
+  padding: 2px 4px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+  transition: top 0.28s cubic-bezier(0.4, 0, 0.2, 1),
               color 0.3s ease,
               opacity 0.3s ease,
               filter 0.3s ease,
@@ -634,46 +595,57 @@ body {
               text-shadow 0.25s ease;
 }
 
-/* No idle cycling — items are invisible until the menu is expanded */
-/* (right menu has no preview animations, unlike the left nav) */
-
-/* Hover / .hovered state — all items visible, staggered in from right */
+/* Hover / .hovered state / menu-open — both menus visible */
 .right-menu-wrap:hover .right-menu-item,
-.right-menu-wrap.hovered .right-menu-item {
-  opacity: 0.85;
+.right-menu-wrap.hovered .right-menu-item,
+.site-header.menu-open .right-menu-item,
+.site-header:has(#artist-name-wrap:hover) .right-menu-item,
+.site-header:has(#right-menu-wrap:hover) .right-menu-item {
+  opacity: 0.95;
   filter: blur(0);
   transform: translateX(0);
 }
 
 /* Stagger: each item delayed slightly so they cascade in — mirrors left nav feel */
 .right-menu-wrap:hover .right-menu-item--play,
-.right-menu-wrap.hovered .right-menu-item--play  {
+.right-menu-wrap.hovered .right-menu-item--play,
+.site-header.menu-open .right-menu-item--play,
+.site-header:has(#artist-name-wrap:hover) .right-menu-item--play,
+.site-header:has(#right-menu-wrap:hover) .right-menu-item--play {
   top: 0px;
   transition-delay: 0ms;
 }
 
 .right-menu-wrap:hover .right-menu-item--sort,
-.right-menu-wrap.hovered .right-menu-item--sort  {
-  top: 26px;
-  transition-delay: 40ms;
+.right-menu-wrap.hovered .right-menu-item--sort,
+.site-header.menu-open .right-menu-item--sort,
+.site-header:has(#artist-name-wrap:hover) .right-menu-item--sort,
+.site-header:has(#right-menu-wrap:hover) .right-menu-item--sort {
+  top: 34px;
+  transition-delay: 35ms;
 }
 
 .right-menu-wrap:hover .right-menu-item--frame,
-.right-menu-wrap.hovered .right-menu-item--frame {
-  top: 52px;
-  transition-delay: 80ms;
+.right-menu-wrap.hovered .right-menu-item--frame,
+.site-header.menu-open .right-menu-item--frame,
+.site-header:has(#artist-name-wrap:hover) .right-menu-item--frame,
+.site-header:has(#right-menu-wrap:hover) .right-menu-item--frame {
+  top: 68px;
+  transition-delay: 70ms;
 }
 
 .right-menu-wrap:hover .right-menu-item--theme,
-.right-menu-wrap.hovered .right-menu-item--theme {
-  top: 78px;
-  transition-delay: 120ms;
+.right-menu-wrap.hovered .right-menu-item--theme,
+.site-header.menu-open .right-menu-item--theme,
+.site-header:has(#artist-name-wrap:hover) .right-menu-item--theme,
+.site-header:has(#right-menu-wrap:hover) .right-menu-item--theme {
+  top: 102px;
+  transition-delay: 105ms;
 }
 
 /* Full opacity + raised emboss on individual item hover */
-.right-menu-wrap:hover .right-menu-item:hover,
-.right-menu-wrap.hovered .right-menu-item:hover {
-  opacity: 1;
+.right-menu-item:hover {
+  opacity: 1 !important;
 }
 
 
@@ -910,10 +882,10 @@ body.modal-open {
   background: none;
   border: none;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
   color: var(--text-muted);
   cursor: pointer;
   padding: 4px 6px;
@@ -1066,25 +1038,40 @@ body.modal-open {
 .about-title {
   position: relative;
   z-index: 20;
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: clamp(1.4rem, 2.2vw, 1.8rem);
+  font-family: 'Glook', Georgia, serif;
+  font-size: clamp(1.4rem, 2.2vw, 1.85rem);
   font-weight: 700;
+  -webkit-text-stroke: 0.65px currentColor;
+  paint-order: stroke fill;
   letter-spacing: 0.02em;
-  color: var(--text-secondary);
+  text-transform: none;
+  color: #111111;
   margin-bottom: 4px;
   line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.95), 0 0 20px rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="dark"] .about-title {
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 20px rgba(0, 0, 0, 0.9);
 }
 
 .about-subtitle {
   position: relative;
   z-index: 20;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: #27272a;
+  font-weight: 700;
   margin-bottom: 0;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9), 0 0 16px rgba(255, 255, 255, 0.85);
+}
+
+[data-theme="dark"] .about-subtitle {
+  color: #f4f4f5;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 16px rgba(0, 0, 0, 0.85);
 }
 
 /* Downward tactile letter step when cat paws step on text */
@@ -1100,7 +1087,7 @@ body.modal-open {
 
 .about-text-flow p {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   line-height: 1.7;
   color: var(--text);
   opacity: 0.9;
@@ -1136,10 +1123,10 @@ body.modal-open {
   color: var(--text-muted);
   opacity: 0.65;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
 }
 
 .form-input,
@@ -1147,7 +1134,7 @@ body.modal-open {
   width: 100%;
   padding: 10px 12px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   color: var(--text);
   background: rgba(0, 0, 0, 0.03);
   border: 1px solid rgba(0, 0, 0, 0.12);
@@ -1187,10 +1174,10 @@ body.modal-open {
   padding: 10px 22px;
   border-radius: 20px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
   background: var(--text);
   color: var(--bg);
   border: none;

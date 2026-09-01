@@ -8,15 +8,14 @@
   // --- Theme -----------------------------------------------------------
   const html      = document.documentElement;
   const toggle    = document.getElementById('theme-toggle');
-  const mediaDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : { matches: false };
   const saved     = localStorage.getItem('kc-theme');
-  const current   = saved || (mediaDark.matches ? 'dark' : 'light');
+  const current   = saved || 'light';
   html.setAttribute('data-theme', current);
 
   function updateThemeButtonText() {
     if (!toggle) return;
     const isDark = html.getAttribute('data-theme') === 'dark';
-    toggle.textContent = isDark ? 'DARK' : 'LIGHT';
+    toggle.textContent = isDark ? 'dark' : 'light';
   }
   updateThemeButtonText();
 
@@ -26,17 +25,6 @@
       html.setAttribute('data-theme', next);
       localStorage.setItem('kc-theme', next);
       updateThemeButtonText();
-    });
-  }
-
-  // React dynamically to OS system appearance changes if no manual override is saved
-  if (mediaDark.addEventListener) {
-    mediaDark.addEventListener('change', (e) => {
-      if (!localStorage.getItem('kc-theme')) {
-        const next = e.matches ? 'dark' : 'light';
-        html.setAttribute('data-theme', next);
-        updateThemeButtonText();
-      }
     });
   }
 
@@ -365,49 +353,92 @@
 
   ro.observe(gallery);
 
-  // --- Artist-name hover state -----------------------------------------
+  // --- Synchronized Left & Right Menu Controller -----------------------
   const artistWrap = document.getElementById('artist-name-wrap');
-  let hoverLeaveTimer = null;
+  const rightWrap  = document.getElementById('right-menu-wrap');
+  let menuLeaveTimer = null;
 
+  function openBothMenus() {
+    clearTimeout(menuLeaveTimer);
+    if (artistWrap) artistWrap.classList.add('hovered');
+    if (rightWrap) rightWrap.classList.add('hovered');
+    if (siteHeader) siteHeader.classList.add('menu-open');
+  }
+
+  function closeBothMenus(delay = 0) {
+    clearTimeout(menuLeaveTimer);
+    if (delay > 0) {
+      menuLeaveTimer = setTimeout(() => {
+        if (artistWrap) artistWrap.classList.remove('hovered');
+        if (rightWrap) rightWrap.classList.remove('hovered');
+        if (siteHeader) siteHeader.classList.remove('menu-open', 'menu-left-open', 'menu-right-open');
+      }, delay);
+    } else {
+      if (artistWrap) artistWrap.classList.remove('hovered');
+      if (rightWrap) rightWrap.classList.remove('hovered');
+      if (siteHeader) siteHeader.classList.remove('menu-open', 'menu-left-open', 'menu-right-open');
+    }
+  }
+
+  function toggleBothMenus() {
+    const isCurrentlyOpen = (siteHeader && siteHeader.classList.contains('menu-open')) ||
+                            (artistWrap && artistWrap.classList.contains('hovered')) ||
+                            (rightWrap && rightWrap.classList.contains('hovered'));
+    if (isCurrentlyOpen) {
+      closeBothMenus(0);
+    } else {
+      openBothMenus();
+    }
+  }
+
+  // Bind left menu wrap
   if (artistWrap) {
-    artistWrap.addEventListener('mouseenter', () => {
-      clearTimeout(hoverLeaveTimer);
-      artistWrap.classList.add('hovered');
-    });
-
-    artistWrap.addEventListener('mouseleave', () => {
-      clearTimeout(hoverLeaveTimer);
-      hoverLeaveTimer = setTimeout(() => {
-        artistWrap.classList.remove('hovered');
-      }, 400);
-    });
-
-    function toggleHover(e) {
+    artistWrap.addEventListener('mouseenter', openBothMenus);
+    artistWrap.addEventListener('mouseleave', () => closeBothMenus(350));
+    artistWrap.addEventListener('click', (e) => {
       if (e.target.closest('.artist-nav__link')) return;
       if (e.stopPropagation) e.stopPropagation();
-      artistWrap.classList.toggle('hovered');
-    }
-
-    artistWrap.addEventListener('click', toggleHover);
+      toggleBothMenus();
+    });
     artistWrap.addEventListener('touchend', (e) => {
       if (e.target.closest('.artist-nav__link')) return;
       e.preventDefault();
-      toggleHover(e);
+      toggleBothMenus();
     }, { passive: false });
-
-    document.addEventListener('click', (e) => {
-      if (!artistWrap.contains(e.target)) {
-        clearTimeout(hoverLeaveTimer);
-        artistWrap.classList.remove('hovered');
-      }
-    });
-    document.addEventListener('touchstart', (e) => {
-      if (!artistWrap.contains(e.target)) {
-        clearTimeout(hoverLeaveTimer);
-        artistWrap.classList.remove('hovered');
-      }
-    }, { passive: true });
   }
+
+  // Bind right menu wrap
+  if (rightWrap) {
+    rightWrap.addEventListener('mouseenter', openBothMenus);
+    rightWrap.addEventListener('mouseleave', () => closeBothMenus(350));
+    rightWrap.addEventListener('click', (e) => {
+      if (e.target.closest('.right-menu-item')) return;
+      if (e.stopPropagation) e.stopPropagation();
+      toggleBothMenus();
+    });
+    rightWrap.addEventListener('touchend', (e) => {
+      if (e.target.closest('.right-menu-item')) return;
+      e.preventDefault();
+      toggleBothMenus();
+    }, { passive: false });
+  }
+
+  // Close menus when tapping / clicking anywhere outside
+  document.addEventListener('click', (e) => {
+    const clickedInsideLeft  = artistWrap && artistWrap.contains(e.target);
+    const clickedInsideRight = rightWrap && rightWrap.contains(e.target);
+    if (!clickedInsideLeft && !clickedInsideRight) {
+      closeBothMenus(0);
+    }
+  });
+
+  document.addEventListener('touchstart', (e) => {
+    const touchedInsideLeft  = artistWrap && artistWrap.contains(e.target);
+    const touchedInsideRight = rightWrap && rightWrap.contains(e.target);
+    if (!touchedInsideLeft && !touchedInsideRight) {
+      closeBothMenus(0);
+    }
+  }, { passive: true });
 
   // --- Glass Modal Controller (About & Contact) ------------------------
   const modal         = document.getElementById('glass-modal');
@@ -825,7 +856,7 @@
     if (autoScrollBtn) {
       autoScrollBtn.classList.remove('playing');
       autoScrollBtn.setAttribute('aria-pressed', 'false');
-      autoScrollBtn.textContent = 'PLAY';
+      autoScrollBtn.textContent = 'play';
     }
   }
 
@@ -833,11 +864,14 @@
     if (isAutoScrolling) return;
     isAutoScrolling     = true;
     autoScrollStartTime = Date.now();
+
+    // Immediately close both menus when PLAY starts
+    closeBothMenus(0);
     
     if (autoScrollBtn) {
       autoScrollBtn.classList.add('playing');
       autoScrollBtn.setAttribute('aria-pressed', 'true');
-      autoScrollBtn.textContent = 'PAUSE';
+      autoScrollBtn.textContent = 'pause';
     }
 
     const scrollSpeed = 1.1; // Smooth, peaceful exhibition scroll speed
@@ -879,6 +913,13 @@
     autoScrollBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
+
+      // Immediately close both menus on PLAY click
+      closeBothMenus(0);
+      if (document.activeElement && typeof document.activeElement.blur === 'function') {
+        document.activeElement.blur();
+      }
+
       if (isAutoScrolling) {
         stopAutoScroll();
       } else {
@@ -982,52 +1023,3 @@
   }
 
 })();
-
-// --- Right-menu expand/collapse (mirrors left artist-name-wrap logic) ------
-(function () {
-  const rightWrap = document.getElementById('right-menu-wrap');
-  if (!rightWrap) return;
-
-  let hoverLeaveTimer = null;
-
-  rightWrap.addEventListener('mouseenter', () => {
-    clearTimeout(hoverLeaveTimer);
-    rightWrap.classList.add('hovered');
-  });
-
-  rightWrap.addEventListener('mouseleave', () => {
-    clearTimeout(hoverLeaveTimer);
-    hoverLeaveTimer = setTimeout(() => {
-      rightWrap.classList.remove('hovered');
-    }, 400);
-  });
-
-  function toggleHover(e) {
-    if (e.target.closest('.right-menu-item')) return; // let item handle click
-    if (e.stopPropagation) e.stopPropagation();
-    rightWrap.classList.toggle('hovered');
-  }
-
-  rightWrap.addEventListener('click', toggleHover);
-  rightWrap.addEventListener('touchend', (e) => {
-    if (e.target.closest('.right-menu-item')) return;
-    e.preventDefault();
-    toggleHover(e);
-  }, { passive: false });
-
-  document.addEventListener('click', (e) => {
-    if (!rightWrap.contains(e.target)) {
-      clearTimeout(hoverLeaveTimer);
-      rightWrap.classList.remove('hovered');
-    }
-  });
-  document.addEventListener('touchstart', (e) => {
-    if (!rightWrap.contains(e.target)) {
-      clearTimeout(hoverLeaveTimer);
-      rightWrap.classList.remove('hovered');
-    }
-  }, { passive: true });
-}());
-
-
-
