@@ -651,8 +651,18 @@ body::before {
 .right-menu-wrap.hovered .right-menu-item:hover,
 .right-menu-item:active,
 .right-menu-item.active,
-.right-menu-item.playing,
-.right-menu-item.modern {
+.right-menu-item.playing {
+  color: var(--text) !important;
+  font-weight: 700;
+  opacity: 1 !important;
+}
+
+/* .modern only applies its emphasis when the menu is actually visible */
+.right-menu-wrap:hover .right-menu-item.modern,
+.right-menu-wrap.hovered .right-menu-item.modern,
+.site-header.menu-open .right-menu-item.modern,
+.site-header:has(#artist-name-wrap:hover) .right-menu-item.modern,
+.site-header:has(#right-menu-wrap:hover) .right-menu-item.modern {
   color: var(--text) !important;
   font-weight: 700;
   opacity: 1 !important;
