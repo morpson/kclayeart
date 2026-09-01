@@ -6,16 +6,39 @@
   'use strict';
 
   // --- Theme -----------------------------------------------------------
-  const html   = document.documentElement;
-  const toggle = document.getElementById('theme-toggle');
-  const saved  = localStorage.getItem('kc-theme') || 'light';
-  html.setAttribute('data-theme', saved);
+  const html      = document.documentElement;
+  const toggle    = document.getElementById('theme-toggle');
+  const mediaDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : { matches: false };
+  const saved     = localStorage.getItem('kc-theme');
+  const current   = saved || (mediaDark.matches ? 'dark' : 'light');
+  html.setAttribute('data-theme', current);
 
-  toggle.addEventListener('click', () => {
-    const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-    html.setAttribute('data-theme', next);
-    localStorage.setItem('kc-theme', next);
-  });
+  function updateThemeButtonText() {
+    if (!toggle) return;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    toggle.textContent = isDark ? 'DARK' : 'LIGHT';
+  }
+  updateThemeButtonText();
+
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('kc-theme', next);
+      updateThemeButtonText();
+    });
+  }
+
+  // React dynamically to OS system appearance changes if no manual override is saved
+  if (mediaDark.addEventListener) {
+    mediaDark.addEventListener('change', (e) => {
+      if (!localStorage.getItem('kc-theme')) {
+        const next = e.matches ? 'dark' : 'light';
+        html.setAttribute('data-theme', next);
+        updateThemeButtonText();
+      }
+    });
+  }
 
   // --- Intro animation -------------------------------------------------
   const introEl = document.querySelector('.intro-text');
@@ -242,16 +265,10 @@
     }
   }
 
-  // --- Sort / layout buttons -------------------------------------------
-  const sortBtns = document.querySelectorAll('.sort-btn');
-
-  function updateButtonUI() {
-    sortBtns.forEach((b) => {
-      const active = b.dataset.layout === layoutMode;
-      b.classList.toggle('active', active);
-      b.setAttribute('aria-pressed', String(active));
-    });
-  }
+  // --- Sort cycle button (text menu) -----------------------------------
+  // A single button cycles 1col → 2col → 3col → 1col
+  const sortCycleBtn  = document.getElementById('sort-cycle-btn');
+  const SORT_SEQUENCE = ['1col', '2col', '3col'];
 
   function setLayout(mode, isManual = true) {
     layoutMode = mode;
@@ -260,16 +277,16 @@
       localStorage.setItem('kc-layout', mode);
       localStorage.setItem('kc-layout-tier', manualOverrideTier);
     }
-    updateButtonUI();
-    layout(isManual); // isManual=true → animated smooth re-arrange
+    layout(isManual);
   }
 
-  // Wire up buttons
-  sortBtns.forEach((btn) => {
-    const mode = btn.dataset.layout;
-    btn.addEventListener('click', () => setLayout(mode, true));
-  });
-  updateButtonUI();
+  if (sortCycleBtn) {
+    sortCycleBtn.addEventListener('click', () => {
+      const idx  = SORT_SEQUENCE.indexOf(layoutMode);
+      const next = SORT_SEQUENCE[(idx + 1) % SORT_SEQUENCE.length];
+      setLayout(next, true);
+    });
+  }
 
   // On resize: if breakpoint tier changed, reset override and apply auto
   let lastTier = autoTier();
@@ -808,7 +825,7 @@
     if (autoScrollBtn) {
       autoScrollBtn.classList.remove('playing');
       autoScrollBtn.setAttribute('aria-pressed', 'false');
-      autoScrollBtn.setAttribute('title', 'Auto-scroll gallery');
+      autoScrollBtn.textContent = 'PLAY';
     }
   }
 
@@ -820,7 +837,7 @@
     if (autoScrollBtn) {
       autoScrollBtn.classList.add('playing');
       autoScrollBtn.setAttribute('aria-pressed', 'true');
-      autoScrollBtn.setAttribute('title', 'Pause auto-scroll');
+      autoScrollBtn.textContent = 'PAUSE';
     }
 
     const scrollSpeed = 1.1; // Smooth, peaceful exhibition scroll speed
@@ -906,6 +923,7 @@
     frameStyleToggle.addEventListener('click', () => {
       currentFrameStyle = currentFrameStyle === 'eclectic' ? 'modern' : 'eclectic';
       frameStyleToggle.classList.toggle('modern', currentFrameStyle === 'modern');
+      // Button label stays "FRAMES" — the visual gallery change communicates the state
 
       items.forEach((item, index) => {
         const post     = sorted[index];
@@ -964,5 +982,52 @@
   }
 
 })();
+
+// --- Right-menu expand/collapse (mirrors left artist-name-wrap logic) ------
+(function () {
+  const rightWrap = document.getElementById('right-menu-wrap');
+  if (!rightWrap) return;
+
+  let hoverLeaveTimer = null;
+
+  rightWrap.addEventListener('mouseenter', () => {
+    clearTimeout(hoverLeaveTimer);
+    rightWrap.classList.add('hovered');
+  });
+
+  rightWrap.addEventListener('mouseleave', () => {
+    clearTimeout(hoverLeaveTimer);
+    hoverLeaveTimer = setTimeout(() => {
+      rightWrap.classList.remove('hovered');
+    }, 400);
+  });
+
+  function toggleHover(e) {
+    if (e.target.closest('.right-menu-item')) return; // let item handle click
+    if (e.stopPropagation) e.stopPropagation();
+    rightWrap.classList.toggle('hovered');
+  }
+
+  rightWrap.addEventListener('click', toggleHover);
+  rightWrap.addEventListener('touchend', (e) => {
+    if (e.target.closest('.right-menu-item')) return;
+    e.preventDefault();
+    toggleHover(e);
+  }, { passive: false });
+
+  document.addEventListener('click', (e) => {
+    if (!rightWrap.contains(e.target)) {
+      clearTimeout(hoverLeaveTimer);
+      rightWrap.classList.remove('hovered');
+    }
+  });
+  document.addEventListener('touchstart', (e) => {
+    if (!rightWrap.contains(e.target)) {
+      clearTimeout(hoverLeaveTimer);
+      rightWrap.classList.remove('hovered');
+    }
+  }, { passive: true });
+}());
+
 
 
