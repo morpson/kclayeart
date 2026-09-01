@@ -22,3 +22,12 @@ assets/frame_transparent.png
 
 # Local Netlify folder
 .netlify
+
+# Netlify deploy artifacts
+deploy-*.zip
+
+# Raw source video files (web-ready mp4s in assets/ are kept)
+*.mov
+
+# Scratch / dev files
+grid.html
