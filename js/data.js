@@ -1,8 +1,22 @@
-// Portfolio data — Curated selection of 22 artworks from @kclaye_art Instagram
+// Portfolio data — Curated selection of 24 artworks from @kclaye_art Instagram
 // Each item includes verified Instagram post URL, eclectic frame with precise mat specs,
 // and curated modern frame pairing with matching aspect ratio and exact mat window.
 
 const POSTS_DATA = [
+  {
+    "filename": "2026-08-30_23-58-32_utc_1.jpg",
+    "url": "https://www.instagram.com/p/DcrvxivlO6B/",
+    "likes": 47,
+    "subject": "architecture",
+    "frame": "frame-landscape-classic",
+    "aspectRatio": 1.1278,
+    "mat": { "top": 27.63, "left": 22.33, "width": 55.42, "height": 45.21 },
+    "modern": {
+      "frame": "modern_frame20.PNG",
+      "aspectRatio": 1.2723,
+      "mat": { "top": 17.81, "left": 14.7, "width": 70.9, "height": 64.25 }
+    }
+  },
   {
     "filename": "2025-12-24_18-35-41_utc_1.jpg",
     "url": "https://www.instagram.com/p/DSqA5IED9PF/",
@@ -155,6 +169,20 @@ const POSTS_DATA = [
       "frame": "modern_frame20.PNG",
       "aspectRatio": 1.272,
       "mat": { "top": 17.81, "left": 14.7, "width": 71.0, "height": 64.38 }
+    }
+  },
+  {
+    "filename": "2026-08-24_03-20-57_utc_1.jpg",
+    "url": "https://www.instagram.com/p/DcaFX9SjRcl/",
+    "likes": 52,
+    "subject": "architecture",
+    "frame": "frame-landscape-a",
+    "aspectRatio": 1.6667,
+    "mat": { "top": 13.47, "left": 7.75, "width": 84.08, "height": 72.64 },
+    "modern": {
+      "frame": "modern_frame22.PNG",
+      "aspectRatio": 1.4303,
+      "mat": { "top": 18.48, "left": 13.56, "width": 72.46, "height": 62.73 }
     }
   },
   {

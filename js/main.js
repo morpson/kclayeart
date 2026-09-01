@@ -402,11 +402,208 @@
   const maiseyVideo   = document.getElementById('maisey-walk-video');
   let maiseyLoopTimer = null;
 
+  // Exact tracking data from maisey_walk video: [time, pawMinX, pawMaxX, catCenter, catMinX, catMaxX]
+  const MAISEY_TRACK = [
+    [0.25, 0.0385, 0.1802, 0.119, 0.037, 0.201],
+    [0.5, 0.0385, 0.1807, 0.118, 0.0359, 0.2],
+    [0.75, 0.0385, 0.1807, 0.1198, 0.0354, 0.2042],
+    [1.0, 0.0385, 0.1807, 0.1227, 0.037, 0.2083],
+    [1.25, 0.0385, 0.1807, 0.1227, 0.0365, 0.2089],
+    [1.5, 0.0385, 0.1807, 0.1255, 0.0344, 0.2167],
+    [1.75, 0.0375, 0.1807, 0.125, 0.0354, 0.2146],
+    [2.0, 0.037, 0.2109, 0.1313, 0.0333, 0.2292],
+    [2.25, 0.0359, 0.2583, 0.1471, 0.0333, 0.2609],
+    [2.5, 0.0286, 0.262, 0.1583, 0.025, 0.2917],
+    [2.75, 0.0219, 0.2609, 0.1784, 0.0167, 0.3401],
+    [3.0, 0.012, 0.3208, 0.1859, 0.0083, 0.3635],
+    [3.25, 0.0094, 0.3672, 0.1917, 0.0083, 0.375],
+    [3.5, 0.0208, 0.3656, 0.2068, 0.0177, 0.3958],
+    [3.75, 0.0573, 0.3583, 0.2216, 0.0229, 0.4203],
+    [4.0, 0.1203, 0.3464, 0.2484, 0.062, 0.4349],
+    [4.25, 0.1224, 0.3823, 0.2594, 0.0703, 0.4484],
+    [4.5, 0.1234, 0.4583, 0.2753, 0.0807, 0.4698],
+    [4.75, 0.1385, 0.4604, 0.2888, 0.0807, 0.4969],
+    [5.0, 0.2089, 0.4547, 0.3182, 0.1141, 0.5224],
+    [5.25, 0.2167, 0.4589, 0.3271, 0.1156, 0.5385],
+    [5.5, 0.2208, 0.4906, 0.344, 0.1307, 0.5573],
+    [5.75, 0.225, 0.5573, 0.3529, 0.1328, 0.5729],
+    [6.0, 0.2401, 0.5505, 0.368, 0.1495, 0.5865],
+    [6.25, 0.2865, 0.5531, 0.3753, 0.1495, 0.601],
+    [6.5, 0.2984, 0.549, 0.3956, 0.1792, 0.612],
+    [6.75, 0.2984, 0.5443, 0.3995, 0.1792, 0.6198],
+    [7.0, 0.2958, 0.5495, 0.4086, 0.1911, 0.626],
+    [7.25, 0.2974, 0.5615, 0.4135, 0.1958, 0.6312],
+    [7.5, 0.2943, 0.5557, 0.4174, 0.2031, 0.6318],
+    [7.75, 0.2974, 0.5479, 0.4164, 0.2078, 0.625],
+    [8.0, 0.3474, 0.5385, 0.4135, 0.2083, 0.6188],
+    [8.25, 0.3448, 0.5344, 0.4115, 0.2083, 0.6146],
+    [8.5, 0.3443, 0.5292, 0.4062, 0.2036, 0.6089],
+    [8.75, 0.3604, 0.5245, 0.4018, 0.2031, 0.6005],
+    [9.0, 0.2245, 0.5193, 0.3979, 0.2042, 0.5917],
+    [9.25, 0.2214, 0.5172, 0.3953, 0.2068, 0.5839],
+    [9.5, 0.2167, 0.5151, 0.3885, 0.2083, 0.5687],
+    [9.75, 0.213, 0.513, 0.3812, 0.2083, 0.5542],
+    [10.0, 0.2062, 0.5109, 0.375, 0.2042, 0.5458],
+    [10.25, 0.2099, 0.5104, 0.3766, 0.2073, 0.5458],
+    [10.5, 0.2271, 0.5104, 0.3831, 0.224, 0.5422],
+    [10.75, 0.2339, 0.5094, 0.3891, 0.2328, 0.5453],
+    [11.0, 0.2307, 0.5094, 0.3839, 0.2292, 0.5385],
+    [11.25, 0.2307, 0.5099, 0.3826, 0.2276, 0.5375],
+    [11.5, 0.2307, 0.5099, 0.3807, 0.226, 0.5354],
+    [11.75, 0.2307, 0.5099, 0.3833, 0.2292, 0.5375],
+    [12.0, 0.2297, 0.5099, 0.3841, 0.2271, 0.5411],
+    [12.25, 0.2297, 0.5099, 0.3828, 0.2276, 0.538],
+    [12.5, 0.2307, 0.5094, 0.3857, 0.2292, 0.5422],
+    [12.75, 0.2307, 0.5094, 0.3875, 0.2292, 0.5458],
+    [13.0, 0.2271, 0.5089, 0.3917, 0.225, 0.5583],
+    [13.25, 0.224, 0.5078, 0.3935, 0.2203, 0.5667],
+    [13.5, 0.2214, 0.5052, 0.4003, 0.2193, 0.5813],
+    [13.75, 0.2255, 0.5036, 0.4081, 0.2203, 0.5958],
+    [14.0, 0.213, 0.5427, 0.4094, 0.2104, 0.6083],
+    [14.25, 0.2047, 0.5927, 0.4091, 0.2021, 0.6161],
+    [14.5, 0.3464, 0.6141, 0.4229, 0.2104, 0.6354],
+    [14.75, 0.3521, 0.6094, 0.4432, 0.224, 0.6625],
+    [15.0, 0.3479, 0.6, 0.4607, 0.2328, 0.6885],
+    [15.25, 0.3516, 0.6516, 0.4701, 0.2328, 0.7073],
+    [15.5, 0.3589, 0.7161, 0.4977, 0.2651, 0.7302],
+    [15.75, 0.4094, 0.7052, 0.5268, 0.2906, 0.763],
+    [16.0, 0.401, 0.7, 0.5495, 0.3068, 0.7922],
+    [16.25, 0.4094, 0.7906, 0.5651, 0.3135, 0.8167],
+    [16.5, 0.4896, 0.8063, 0.5974, 0.3531, 0.8417],
+    [16.75, 0.4938, 0.7979, 0.6133, 0.3573, 0.8693],
+    [17.0, 0.4927, 0.8766, 0.6474, 0.3906, 0.9042],
+    [17.25, 0.5234, 0.9234, 0.6578, 0.3906, 0.925],
+    [17.5, 0.5927, 0.9135, 0.7148, 0.475, 0.9547],
+    [17.75, 0.5062, 0.9036, 0.7336, 0.4917, 0.9755],
+    [18.0, 0.5344, 0.9594, 0.7469, 0.5344, 0.9594]
+  ];
+
+  function getMaiseyTrackAt(timeSec) {
+    if (timeSec <= MAISEY_TRACK[0][0]) return MAISEY_TRACK[0];
+    if (timeSec >= MAISEY_TRACK[MAISEY_TRACK.length - 1][0]) return MAISEY_TRACK[MAISEY_TRACK.length - 1];
+
+    let low = 0;
+    let high = MAISEY_TRACK.length - 1;
+    while (low <= high) {
+      const mid = (low + high) >> 1;
+      if (MAISEY_TRACK[mid][0] < timeSec) {
+        low = mid + 1;
+      } else {
+        high = mid - 1;
+      }
+    }
+
+    const p1 = MAISEY_TRACK[Math.max(0, low - 1)];
+    const p2 = MAISEY_TRACK[Math.min(MAISEY_TRACK.length - 1, low)];
+    const dt = p2[0] - p1[0];
+    const ratio = dt > 0 ? (timeSec - p1[0]) / dt : 0;
+
+    return [
+      timeSec,
+      p1[1] + (p2[1] - p1[1]) * ratio, // pawMinX
+      p1[2] + (p2[2] - p1[2]) * ratio, // pawMaxX
+      p1[3] + (p2[3] - p1[3]) * ratio, // catCenter
+      p1[4] + (p2[4] - p1[4]) * ratio, // catMinX
+      p1[5] + (p2[5] - p1[5]) * ratio  // catMaxX
+    ];
+  }
+
+  let charElements = [];
+  let topRowChars  = [];
+  let physicsRaf   = null;
+
+  function initMaiseyTextSplitting() {
+    const firstP = document.querySelector('.about-text-flow p:first-child');
+    if (!firstP || firstP.dataset.split) return;
+    firstP.dataset.split = 'true';
+
+    const text = firstP.textContent.trim();
+    const words = text.split(/\s+/);
+    firstP.innerHTML = words.map((word) => {
+      const chars = Array.from(word).map((c) => `<span class="maisey-char">${c}</span>`).join('');
+      return `<span class="maisey-word" style="display:inline-block;white-space:nowrap;">${chars}</span>`;
+    }).join(' ');
+
+    refreshTopRowChars();
+  }
+
+  function refreshTopRowChars() {
+    charElements = Array.from(document.querySelectorAll('.about-text-flow p:first-child .maisey-char'));
+    if (!charElements.length) return;
+    const firstTop = charElements[0].getBoundingClientRect().top;
+    topRowChars = charElements.filter((el) => {
+      const rect = el.getBoundingClientRect();
+      return Math.abs(rect.top - firstTop) < 18;
+    });
+  }
+
+  function startMaiseyPhysics() {
+    if (physicsRaf) cancelAnimationFrame(physicsRaf);
+    refreshTopRowChars();
+
+    const heroProfile  = document.querySelector('.about-profile-wrap');
+    const heroTitle    = document.querySelector('.about-title');
+    const heroSubtitle = document.querySelector('.about-subtitle');
+
+    function stepPhysics() {
+      if (!maiseyVideo || maiseyVideo.paused || maiseyVideo.ended || !modal || !modal.classList.contains('active')) {
+        resetMaiseyPhysics();
+        return;
+      }
+
+      const t = maiseyVideo.currentTime;
+      const track = getMaiseyTrackAt(t);
+      const videoRect = maiseyVideo.getBoundingClientRect();
+
+      if (videoRect.width > 0 && maiseyVideo.style.opacity === '1') {
+        const pawLeft  = videoRect.left + track[1] * videoRect.width;
+        const pawRight = videoRect.left + track[2] * videoRect.width;
+        const catLeft  = videoRect.left + track[4] * videoRect.width;
+        const catRight = videoRect.left + track[5] * videoRect.width;
+
+        // Text underneath: bump characters stepped on by paws
+        for (let i = 0; i < topRowChars.length; i++) {
+          const ch = topRowChars[i];
+          const r = ch.getBoundingClientRect();
+          const chMid = r.left + r.width / 2;
+          if (chMid >= pawLeft - 4 && chMid <= pawRight + 4) {
+            ch.classList.add('stepped');
+          } else {
+            ch.classList.remove('stepped');
+          }
+        }
+      } else {
+        resetMaiseyPhysics(false);
+      }
+
+      physicsRaf = requestAnimationFrame(stepPhysics);
+    }
+
+    physicsRaf = requestAnimationFrame(stepPhysics);
+  }
+
+  function resetMaiseyPhysics(cancel = true) {
+    if (cancel && physicsRaf) {
+      cancelAnimationFrame(physicsRaf);
+      physicsRaf = null;
+    }
+    if (charElements.length) {
+      charElements.forEach((ch) => ch.classList.remove('stepped'));
+    }
+  }
+
+  window.addEventListener('resize', () => {
+    if (modal && modal.classList.contains('active')) {
+      refreshTopRowChars();
+    }
+  });
+
   function scheduleMaiseyWalk(delayMs = 10000) {
     if (maiseyLoopTimer) {
       clearTimeout(maiseyLoopTimer);
       maiseyLoopTimer = null;
     }
+    resetMaiseyPhysics();
     if (maiseyVideo) {
       maiseyVideo.style.opacity = '0';
       maiseyVideo.pause();
@@ -427,6 +624,7 @@
         if (playPromise !== undefined) {
           playPromise.catch(() => {});
         }
+        startMaiseyPhysics();
       } catch (err) {}
     }
   }
@@ -436,6 +634,7 @@
       clearTimeout(maiseyLoopTimer);
       maiseyLoopTimer = null;
     }
+    resetMaiseyPhysics();
     if (maiseyVideo) {
       try {
         maiseyVideo.style.opacity = '0';
@@ -448,6 +647,7 @@
     maiseyVideo.addEventListener('ended', () => {
       // Fade out gently after completing walk
       maiseyVideo.style.opacity = '0';
+      resetMaiseyPhysics();
       // Wait for a calm 10-second pause before starting next walk cycle
       scheduleMaiseyWalk(10000);
     });
@@ -455,13 +655,14 @@
 
   function openModal(sectionName) {
     if (!modal) return;
+    initMaiseyTextSplitting();
     const target = sectionName || 'about';
     switchModalSection(target);
     modal.classList.add('active');
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
     if (target === 'about') {
-      scheduleMaiseyWalk(10000);
+      scheduleMaiseyWalk(7000);
     }
   }
 
@@ -477,6 +678,7 @@
   }
 
   function switchModalSection(sectionName) {
+    initMaiseyTextSplitting();
     modalTabs.forEach((tab) => {
       const isTarget = tab.dataset.target === sectionName;
       tab.classList.toggle('active', isTarget);
@@ -489,7 +691,7 @@
     });
 
     if (sectionName === 'about') {
-      scheduleMaiseyWalk(10000);
+      scheduleMaiseyWalk(7000);
     } else {
       pauseMaiseyWalk();
     }

@@ -1052,7 +1052,6 @@ body.modal-open {
 
 .about-hero {
   position: relative;
-  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1065,7 +1064,7 @@ body.modal-open {
   width: 100%;
 }
 
-/* Walking cat layer — paws placed directly at bottom of video, stepping directly on top of text */
+/* Walking cat layer — walks in front of profile photo (z:1), behind title/subtitle (z:20), and over text (z:1) */
 .maisey-walk-container {
   position: absolute;
   top: 0;
@@ -1095,6 +1094,7 @@ body.modal-open {
 
 .about-profile-wrap {
   position: relative;
+  z-index: 1;
   width: 120px;
   height: 120px;
   border-radius: 50%;
@@ -1120,23 +1120,40 @@ body.modal-open {
 }
 
 .about-title {
+  position: relative;
+  z-index: 20;
   font-family: 'Playfair Display', Georgia, serif;
   font-size: clamp(1.4rem, 2.2vw, 1.8rem);
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: var(--text);
+  color: #ffffff;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6), 0 0 14px rgba(255, 255, 255, 0.35);
   margin-bottom: 4px;
   line-height: 1.2;
 }
 
 .about-subtitle {
+  position: relative;
+  z-index: 20;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 0.78rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
   font-weight: 600;
   margin-bottom: 0;
+}
+
+/* Downward tactile letter step when cat paws step on text */
+.maisey-char {
+  display: inline-block;
+  will-change: transform;
+  transition: transform 0.16s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.maisey-char.stepped {
+  transform: translateY(1.8px);
 }
 
 .about-text-flow p {
