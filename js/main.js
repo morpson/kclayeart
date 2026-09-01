@@ -80,6 +80,10 @@
     const delta = currentY - lastScrollY;
 
     if (siteHeader && siteHeader.classList.contains('visible')) {
+      if (Math.abs(delta) > 5 && (siteHeader.classList.contains('menu-open') || (artistWrap && artistWrap.classList.contains('hovered')) || (rightWrap && rightWrap.classList.contains('hovered')))) {
+        closeBothMenus(0);
+      }
+
       if (currentY <= 20) {
         siteHeader.classList.remove('scrolled-down');
       } else if (delta > 6 && currentY > 60) {
@@ -359,6 +363,7 @@
   let menuLeaveTimer = null;
 
   function openBothMenus() {
+    if (isAutoScrolling) return; // Never expand menus while auto-scrolling
     clearTimeout(menuLeaveTimer);
     if (artistWrap) artistWrap.classList.add('hovered');
     if (rightWrap) rightWrap.classList.add('hovered');
@@ -381,6 +386,11 @@
   }
 
   function toggleBothMenus() {
+    if (isAutoScrolling) {
+      stopAutoScroll();
+      closeBothMenus(0);
+      return;
+    }
     const isCurrentlyOpen = (siteHeader && siteHeader.classList.contains('menu-open')) ||
                             (artistWrap && artistWrap.classList.contains('hovered')) ||
                             (rightWrap && rightWrap.classList.contains('hovered'));
@@ -394,7 +404,7 @@
   // Bind left menu wrap
   if (artistWrap) {
     artistWrap.addEventListener('mouseenter', openBothMenus);
-    artistWrap.addEventListener('mouseleave', () => closeBothMenus(350));
+    artistWrap.addEventListener('mouseleave', () => closeBothMenus(300));
     artistWrap.addEventListener('click', (e) => {
       if (e.target.closest('.artist-nav__link')) return;
       if (e.stopPropagation) e.stopPropagation();
@@ -410,7 +420,7 @@
   // Bind right menu wrap
   if (rightWrap) {
     rightWrap.addEventListener('mouseenter', openBothMenus);
-    rightWrap.addEventListener('mouseleave', () => closeBothMenus(350));
+    rightWrap.addEventListener('mouseleave', () => closeBothMenus(300));
     rightWrap.addEventListener('click', (e) => {
       if (e.target.closest('.right-menu-item')) return;
       if (e.stopPropagation) e.stopPropagation();
@@ -703,6 +713,7 @@
 
   function openModal(sectionName) {
     if (!modal) return;
+    closeBothMenus(0);
     initMaiseyTextSplitting();
     const target = sectionName || 'about';
     switchModalSection(target);
@@ -849,6 +860,8 @@
   function stopAutoScroll() {
     if (!isAutoScrolling) return;
     isAutoScrolling = false;
+    document.body.classList.remove('is-autoscrolling');
+    if (siteHeader) siteHeader.classList.remove('auto-scrolling');
     if (autoScrollRaf) {
       cancelAnimationFrame(autoScrollRaf);
       autoScrollRaf = null;
@@ -864,6 +877,9 @@
     if (isAutoScrolling) return;
     isAutoScrolling     = true;
     autoScrollStartTime = Date.now();
+
+    document.body.classList.add('is-autoscrolling');
+    if (siteHeader) siteHeader.classList.add('auto-scrolling');
 
     // Immediately close both menus when PLAY starts
     closeBothMenus(0);

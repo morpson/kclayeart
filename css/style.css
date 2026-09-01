@@ -392,13 +392,13 @@ body::before {
   top: 0;
   left: 0;
   display: inline-block;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: clamp(1.05rem, 1.9vw, 1.25rem);
-  font-weight: 300;
-  letter-spacing: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: clamp(0.88rem, 1.4vw, 1.02rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: lowercase;
   text-decoration: none;
-  color: var(--text);
+  color: var(--text-muted);
   white-space: nowrap;
   line-height: 1.25;
   opacity: 0;
@@ -411,7 +411,8 @@ body::before {
   cursor: pointer;
   /* Smoothly transition when hovered or tapped */
   transition: top 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-              color 0.3s ease,
+              color 0.25s ease,
+              font-weight 0.2s ease,
               opacity 0.3s ease,
               filter 0.3s ease,
               transform 0.3s ease;
@@ -428,8 +429,8 @@ body::before {
 
 @keyframes kc-cycle-contact {
   0%   { opacity: 0;   transform: translateX(-10px); filter: blur(3px); }
-  8%   { opacity: 0.95; transform: translateX(0);    filter: blur(0);   }
-  43%  { opacity: 0.95; transform: translateX(0);    filter: blur(0);   }
+  8%   { opacity: 0.9; transform: translateX(0);    filter: blur(0);   }
+  43%  { opacity: 0.9; transform: translateX(0);    filter: blur(0);   }
   49%  { opacity: 0;   transform: translateX(10px);  filter: blur(3px); }
   50%, 100% { opacity: 0; transform: translateX(10px); filter: blur(3px); }
 }
@@ -437,8 +438,8 @@ body::before {
 @keyframes kc-cycle-about {
   0%, 50%   { opacity: 0;   transform: translateX(-10px); filter: blur(3px); }
   51%       { opacity: 0;   transform: translateX(-10px); filter: blur(3px); }
-  59%       { opacity: 0.95; transform: translateX(0);    filter: blur(0);   }
-  93%       { opacity: 0.95; transform: translateX(0);    filter: blur(0);   }
+  59%       { opacity: 0.9; transform: translateX(0);    filter: blur(0);   }
+  93%       { opacity: 0.9; transform: translateX(0);    filter: blur(0);   }
   99%, 100% { opacity: 0;   transform: translateX(10px);  filter: blur(3px); }
 }
 
@@ -459,7 +460,7 @@ body::before {
 .site-header.menu-open .artist-nav__contact,
 .site-header:has(#right-menu-wrap:hover) .artist-nav__contact,
 .site-header:has(#artist-name-wrap:hover) .artist-nav__contact {
-  top: 30px; /* Stack distinctly below about with clean line spacing */
+  top: 28px; /* Stack distinctly below about with clean line spacing */
 }
 
 .artist-name-wrap:hover .artist-nav__about,
@@ -470,51 +471,27 @@ body::before {
   top: 0px;
 }
 
-.artist-nav__link:hover {
+/* Hover & Active states: bold and dark (matching active modal tabs) */
+.artist-nav__link:hover,
+.artist-name-wrap.hovered .artist-nav__link:hover,
+.artist-nav__link:active,
+.artist-nav__link.active {
+  color: var(--text) !important;
+  font-weight: 700;
   opacity: 1 !important;
-  text-shadow: 0 0 12px currentColor;
 }
 
-/* ── Embossed text — applied to all menu text items on both sides ── */
-.artist-nav__link,
-.right-menu-label,
-.right-menu-item,
-.about-title,
-.about-subtitle {
+/* ── Embossed text — applied to primary header labels ── */
+.right-menu-label {
   text-shadow:
     0  1px 0   rgba(255,255,255,0.80),
     0 -1px 0   rgba(0,0,0,0.32);
 }
 
-[data-theme="dark"] .artist-nav__link,
-[data-theme="dark"] .right-menu-label,
-[data-theme="dark"] .right-menu-item,
-[data-theme="dark"] .about-title,
-[data-theme="dark"] .about-subtitle {
+[data-theme="dark"] .right-menu-label {
   text-shadow:
     0  1px 0   rgba(255,255,255,0.10),
     0 -1px 0   rgba(0,0,0,0.75);
-}
-
-/* Hover / active → raised emboss (text pops outward) */
-.artist-nav__link:hover,
-.artist-name-wrap.hovered .artist-nav__link:hover,
-.right-menu-item:hover,
-.right-menu-item.active {
-  text-shadow:
-    0 -1px 0   rgba(255,255,255,0.90),
-    0  1px 1px rgba(0,0,0,0.42),
-    0  2px 4px rgba(0,0,0,0.18);
-}
-
-[data-theme="dark"] .artist-nav__link:hover,
-[data-theme="dark"] .artist-name-wrap.hovered .artist-nav__link:hover,
-[data-theme="dark"] .right-menu-item:hover,
-[data-theme="dark"] .right-menu-item.active {
-  text-shadow:
-    0 -1px 0   rgba(255,255,255,0.24),
-    0  1px 1px rgba(0,0,0,0.85),
-    0  2px 5px rgba(0,0,0,0.50);
 }
 
 /* Wrapper — anchored to top-right, mirrors left's position/structure */
@@ -594,15 +571,15 @@ body::before {
   position: absolute;
   right: 0;
   display: inline-block;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: clamp(1.05rem, 1.9vw, 1.25rem);
-  font-weight: 300;
-  letter-spacing: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: clamp(0.88rem, 1.4vw, 1.02rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: lowercase;
   text-decoration: none;
   background: none;
   border: none;
-  color: var(--text);
+  color: var(--text-muted);
   white-space: nowrap;
   line-height: 1.25;
   opacity: 0;
@@ -614,11 +591,11 @@ body::before {
   border-radius: 6px;
   cursor: pointer;
   transition: top 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-              color 0.3s ease,
+              color 0.25s ease,
+              font-weight 0.2s ease,
               opacity 0.3s ease,
               filter 0.3s ease,
-              transform 0.3s ease,
-              text-shadow 0.25s ease;
+              transform 0.3s ease;
 }
 
 /* Hover / .hovered state / menu-open — both menus visible */
@@ -647,7 +624,7 @@ body::before {
 .site-header.menu-open .right-menu-item--sort,
 .site-header:has(#artist-name-wrap:hover) .right-menu-item--sort,
 .site-header:has(#right-menu-wrap:hover) .right-menu-item--sort {
-  top: 30px;
+  top: 28px;
   transition-delay: 35ms;
 }
 
@@ -656,7 +633,7 @@ body::before {
 .site-header.menu-open .right-menu-item--frame,
 .site-header:has(#artist-name-wrap:hover) .right-menu-item--frame,
 .site-header:has(#right-menu-wrap:hover) .right-menu-item--frame {
-  top: 60px;
+  top: 56px;
   transition-delay: 70ms;
 }
 
@@ -665,13 +642,51 @@ body::before {
 .site-header.menu-open .right-menu-item--theme,
 .site-header:has(#artist-name-wrap:hover) .right-menu-item--theme,
 .site-header:has(#right-menu-wrap:hover) .right-menu-item--theme {
-  top: 90px;
+  top: 84px;
   transition-delay: 105ms;
 }
 
-/* Full opacity + raised emboss on individual item hover */
-.right-menu-item:hover {
+/* Full opacity + bold and dark on individual item hover / active / playing */
+.right-menu-item:hover,
+.right-menu-wrap.hovered .right-menu-item:hover,
+.right-menu-item:active,
+.right-menu-item.active,
+.right-menu-item.playing,
+.right-menu-item.modern {
+  color: var(--text) !important;
+  font-weight: 700;
   opacity: 1 !important;
+}
+
+/* ── Auto-scroll collapsed state enforcement ── */
+body.is-autoscrolling .site-header .right-menu-nav,
+body.is-autoscrolling .site-header .artist-nav,
+.site-header.auto-scrolling .right-menu-nav,
+.site-header.auto-scrolling .artist-nav {
+  pointer-events: none !important;
+}
+
+body.is-autoscrolling .site-header .right-menu-item,
+body.is-autoscrolling .site-header .artist-nav__link,
+.site-header.auto-scrolling .right-menu-item,
+.site-header.auto-scrolling .artist-nav__link {
+  opacity: 0 !important;
+  filter: blur(4px) !important;
+  pointer-events: none !important;
+  transform: translateX(10px) !important;
+}
+
+body.is-autoscrolling .site-header .artist-nav__link,
+.site-header.auto-scrolling .artist-nav__link {
+  transform: translateX(-10px) !important;
+}
+
+body.is-autoscrolling .site-header .site-header__static-glass,
+.site-header.auto-scrolling .site-header__static-glass {
+  height: calc(98px + env(safe-area-inset-top, 0px)) !important;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
 }
 
 
@@ -909,18 +924,19 @@ body.modal-open {
   border: none;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: lowercase;
   color: var(--text-muted);
   cursor: pointer;
   padding: 4px 6px;
   border-radius: 4px;
-  transition: color 0.2s ease, opacity 0.2s ease;
+  transition: color 0.2s ease, font-weight 0.2s ease, opacity 0.2s ease;
 }
 
 .glass-modal__tab:hover {
   color: var(--text);
+  font-weight: 700;
 }
 
 .glass-modal__tab.active {
@@ -1032,6 +1048,7 @@ body.modal-open {
 .about-text-flow {
   position: relative;
   z-index: 1;
+  text-align: center;
 }
 
 .about-profile-wrap {
@@ -1074,12 +1091,12 @@ body.modal-open {
   color: #111111;
   margin-bottom: 4px;
   line-height: 1.2;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.95), 0 0 20px rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6), 0 0 14px rgba(255, 255, 255, 0.45);
 }
 
 [data-theme="dark"] .about-title {
   color: #ffffff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 20px rgba(0, 0, 0, 0.9);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), 0 0 14px rgba(0, 0, 0, 0.55);
 }
 
 .about-subtitle {
@@ -1092,12 +1109,12 @@ body.modal-open {
   color: #27272a;
   font-weight: 700;
   margin-bottom: 0;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9), 0 0 16px rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.55), 0 0 12px rgba(255, 255, 255, 0.4);
 }
 
 [data-theme="dark"] .about-subtitle {
   color: #f4f4f5;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 16px rgba(0, 0, 0, 0.85);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65), 0 0 12px rgba(0, 0, 0, 0.5);
 }
 
 /* Downward tactile letter step when cat paws step on text */
@@ -1114,10 +1131,11 @@ body.modal-open {
 .about-text-flow p {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 0.92rem;
-  line-height: 1.7;
+  line-height: 1.75;
   color: var(--text);
   opacity: 0.9;
   margin-bottom: 14px;
+  text-align: center;
 }
 
 .about-text-flow p:last-child {
