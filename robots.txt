@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /assets/
+Allow: /about
+Allow: /contact
+Disallow: /data/
+Disallow: /kclaye_art/
+Disallow: /venv/
+Disallow: /*.py
+Disallow: /deploy_grid/
+Disallow: /grid.html
+
+Sitemap: https://kclayeart.netlify.app/sitemap.xml

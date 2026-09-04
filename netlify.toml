@@ -23,12 +23,32 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Static assets (images, fonts, etc.) — cache aggressively.
-# These rarely change and are not query-string versioned.
+# Static assets (images, frames, videos, fonts, etc.) — cache aggressively.
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, must-revalidate"
+
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, must-revalidate"
+
+# SPA direct routes for /about and /contact
+[[redirects]]
+  from = "/about"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/contact"
+  to = "/index.html"
+  status = 200
 
 # Block direct access to source-only directories
 [[redirects]]
@@ -53,5 +73,15 @@
 
 [[redirects]]
   from = "/*.py"
+  to = "/404"
+  status = 404
+
+[[redirects]]
+  from = "/grid.html"
+  to = "/404"
+  status = 404
+
+[[redirects]]
+  from = "/deploy_grid/*"
   to = "/404"
   status = 404
