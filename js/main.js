@@ -1,5 +1,6 @@
 /* ============================================================
    Katherine Claye Art — main.js
+   Official Portfolio & Interactive Gallery
    ============================================================ */
 
 (function () {
@@ -12,23 +13,25 @@
   const current   = saved || 'light';
   html.setAttribute('data-theme', current);
 
-  function updateThemeButtonText() {
+  function updateThemeButton() {
     if (!toggle) return;
     const isDark = html.getAttribute('data-theme') === 'dark';
     toggle.textContent = isDark ? 'dark' : 'light';
+    toggle.setAttribute('aria-pressed', String(isDark));
+    toggle.setAttribute('aria-label', `Color theme: currently ${isDark ? 'dark' : 'light'}. Click to toggle`);
   }
-  updateThemeButtonText();
+  updateThemeButton();
 
   if (toggle) {
     toggle.addEventListener('click', () => {
       const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
       html.setAttribute('data-theme', next);
       localStorage.setItem('kc-theme', next);
-      updateThemeButtonText();
+      updateThemeButton();
     });
   }
 
-  // --- Intro animation -------------------------------------------------
+  // --- Intro animation & Fast/Skippable Reveal ------------------------
   const introEl = document.querySelector('.intro-text');
   if (introEl) {
     const raw = introEl.textContent;
@@ -37,39 +40,57 @@
       const span = document.createElement('span');
       span.className   = 'letter';
       span.textContent = ch === ' ' ? '\u00A0' : ch;
-      span.style.animationDelay = `${0.3 + i * 0.055}s`;
+      span.style.animationDelay = `${0.15 + i * 0.04}s`;
       introEl.appendChild(span);
     });
   }
 
-  // Fade in persistent header and gallery after intro (3.9s total)
   const siteHeader = document.getElementById('site-header');
   const gallery    = document.getElementById('gallery');
+  const touchHint  = document.getElementById('touch-hint');
+  const introOverlay = document.getElementById('intro-overlay');
 
-  // --- Touch-hint overlay -----------------------------------------------
-  // Show the touch-hint for ~3.5s after the intro finishes, then fade it out.
-  const touchHint = document.getElementById('touch-hint');
-  if (touchHint) {
-    // Appear as soon as the intro fades (~3.9s)
-    setTimeout(() => {
-      touchHint.classList.add('visible');
-    }, 3900);
+  let introDismissed = false;
 
-    // Fade out 3.5s later (7.4s total), then fully remove from paint
-    setTimeout(() => {
-      touchHint.classList.remove('visible');
-      touchHint.classList.add('fadeout');
-      // After the fade transition ends, hide it completely
-      touchHint.addEventListener('transitionend', () => {
-        touchHint.style.display = 'none';
-      }, { once: true });
-    }, 7400);
-  }
-
-  setTimeout(() => {
+  function dismissIntro() {
+    if (introDismissed) return;
+    introDismissed = true;
+    if (introOverlay) {
+      introOverlay.classList.add('dismissed');
+      setTimeout(() => {
+        introOverlay.style.display = 'none';
+      }, 350);
+    }
     if (siteHeader) siteHeader.classList.add('visible');
     if (gallery)    gallery.classList.add('visible');
-  }, 3900);
+    if (!firstLayoutDone) layout(false);
+
+    // Show touch hint briefly after intro
+    if (touchHint) {
+      setTimeout(() => {
+        touchHint.classList.add('visible');
+      }, 600);
+      setTimeout(() => {
+        touchHint.classList.remove('visible');
+        touchHint.classList.add('fadeout');
+        touchHint.addEventListener('transitionend', () => {
+          touchHint.style.display = 'none';
+        }, { once: true });
+      }, 4200);
+    }
+  }
+
+  if (introOverlay) {
+    introOverlay.addEventListener('click', dismissIntro);
+  }
+  document.addEventListener('keydown', (e) => {
+    if (!introDismissed && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      dismissIntro();
+    }
+  }, { once: true });
+
+  // Auto-dismiss intro smoothly after 1.25s
+  setTimeout(dismissIntro, 1250);
 
   // --- Header scroll fade ----------------------------------------------
   let lastScrollY = window.scrollY || 0;
@@ -87,10 +108,8 @@
       if (currentY <= 20) {
         siteHeader.classList.remove('scrolled-down');
       } else if (delta > 6 && currentY > 60) {
-        // Scrolling down
         siteHeader.classList.add('scrolled-down');
       } else if (delta < -6) {
-        // Scrolling up
         siteHeader.classList.remove('scrolled-down');
       }
     }
@@ -106,19 +125,21 @@
     }
   }, { passive: true });
 
-  // --- Gallery build ---------------------------------------------------
+  // --- Gallery build with responsive WebP & descriptive metadata --------
   if (typeof POSTS_DATA === 'undefined' || !gallery) return;
 
   const sorted = [...POSTS_DATA];
 
-  const items = sorted.map((post) => {
+  const items = sorted.map((post, index) => {
     const aspect = post.aspectRatio || 1;
     const link  = document.createElement('a');
-    link.href   = post.url;
-    link.target = '_blank';
-    link.rel    = 'noopener noreferrer';
+    link.href   = '#artwork-' + (post.id || (index + 1));
     link.className = 'art-link';
     link.dataset.aspect = String(aspect);
+    link.dataset.index  = String(index);
+    link.setAttribute('role', 'button');
+    link.setAttribute('tabindex', '0');
+    link.setAttribute('aria-label', `${post.title || 'Artwork'} — view details`);
 
     const wrap = document.createElement('div');
     wrap.className = 'art-frame-wrap';
@@ -137,34 +158,57 @@
 
     const art = document.createElement('img');
     art.className = 'artwork';
-    art.src       = `assets/art/${post.filename}`;
-    art.alt       = 'Artwork by Katherine Claye';
-    art.loading   = 'lazy';
+    art.src       = post.webp ? post.webp.med : `assets/art/${post.filename}`;
+    if (post.webp) {
+      art.srcset = `${post.webp.thumb} 400w, ${post.webp.med} 800w, ${post.webp.full} 1200w`;
+      art.sizes  = '(max-width: 680px) 90vw, (max-width: 1100px) 46vw, 30vw';
+    }
+    art.alt       = post.alt || post.title || 'Artwork by Katherine Claye';
+    art.width     = post.width || 1080;
+    art.height    = post.height || 1350;
+
+    // Load first row eagerly with high fetchpriority for first image
+    if (index === 0) {
+      art.loading = 'eager';
+      art.setAttribute('fetchpriority', 'high');
+      art.decoding = 'sync';
+    } else if (index < 3) {
+      art.loading = 'eager';
+      art.decoding = 'async';
+    } else {
+      art.loading = 'lazy';
+      art.decoding = 'async';
+    }
 
     const frame = document.createElement('img');
     frame.className = 'frame-overlay';
-    frame.src       = `assets/frames/${post.frame}.png`;
+    frame.src       = `assets/frames/webp/${post.frame}.webp`;
     frame.alt       = '';
     frame.setAttribute('aria-hidden', 'true');
-    frame.loading   = 'lazy';
+    frame.loading   = index < 3 ? 'eager' : 'lazy';
 
     mat.appendChild(art);
     wrap.appendChild(mat);
     wrap.appendChild(frame);
     link.appendChild(wrap);
     gallery.appendChild(link);
+
+    // Click opens quick-peek sheet; keyboard opens full detail modal
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      openArtworkPeek(index);
+    });
+    link.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openArtworkModal(index);
+      }
+    });
+
     return { el: link, aspect: aspect };
   });
 
   // --- Layout engine ---------------------------------------------------
-
-  // Breakpoints for auto column selection:
-  //   < 680px   → 1 col
-  //   680–1099px → 2 col
-  //   ≥ 1100px  → 3 col
-  // Manual button clicks override auto within the current breakpoint tier.
-  // Crossing into a new tier resets the override so auto resumes.
-
   function autoTier() {
     const w = window.innerWidth;
     if (w >= 1100) return '3col';
@@ -172,18 +216,15 @@
     return '1col';
   }
 
-  // The CSS --gap custom property value (px) — read once
   function getGap() {
     const raw = getComputedStyle(document.documentElement)
                   .getPropertyValue('--gap').trim();
-    return parseFloat(raw) || 60;
+    return parseFloat(raw) || 50;
   }
 
-  // Track whether the user manually chose a layout within the current tier
   let manualOverrideTier = null;
   let layoutMode = autoTier();
 
-  // Restore any saved manual choice, but only if still in the same breakpoint tier
   const savedMode = localStorage.getItem('kc-layout');
   const savedTier = localStorage.getItem('kc-layout-tier');
   if (savedMode && savedTier && savedTier === autoTier()) {
@@ -215,12 +256,9 @@
     const tp = parseFloat(getComputedStyle(gallery).paddingTop)   || 0;
     const bp = parseFloat(getComputedStyle(gallery).paddingBottom)|| 0;
 
-    // Centre single-column layout horizontally
     const singleColOffset = cols === 1 ? (totalW - cw) / 2 : 0;
-
     const heights = new Array(cols).fill(tp);
 
-    // Compute target positions first
     const targets = items.map((item) => {
       const aspect = item.aspect || 1;
       const itemH  = cw / aspect;
@@ -243,7 +281,6 @@
       });
       gallery.style.height = totalH;
     } else {
-      // Instant snap (resize / init): suppress transitions temporarily
       gallery.classList.add('resizing');
       targets.forEach(({ link, cw, itemH, x, y }) => {
         link.style.width     = `${cw}px`;
@@ -255,12 +292,21 @@
         requestAnimationFrame(() => gallery.classList.remove('resizing'))
       );
     }
+
+    updateLayoutButtonText();
   }
 
-  // --- Sort cycle button (text menu) -----------------------------------
-  // A single button cycles 1col → 2col → 3col → 1col
-  const sortCycleBtn  = document.getElementById('sort-cycle-btn');
-  const SORT_SEQUENCE = ['1col', '2col', '3col'];
+  // --- Layout cycle button ---------------------------------------------
+  const layoutCycleBtn = document.getElementById('layout-cycle-btn') || document.getElementById('sort-cycle-btn');
+  const LAYOUT_SEQUENCE = ['1col', '2col', '3col'];
+
+  function updateLayoutButtonText() {
+    if (!layoutCycleBtn) return;
+    const currentCols = colCount();
+    layoutCycleBtn.textContent = 'layout';
+    layoutCycleBtn.setAttribute('aria-label', `Gallery layout: currently ${currentCols} column${currentCols > 1 ? 's' : ''}. Click to cycle`);
+    layoutCycleBtn.setAttribute('aria-pressed', String(manualOverrideTier !== null));
+  }
 
   function setLayout(mode, isManual = true) {
     layoutMode = mode;
@@ -272,17 +318,15 @@
     layout(isManual);
   }
 
-  if (sortCycleBtn) {
-    sortCycleBtn.addEventListener('click', () => {
-      const idx  = SORT_SEQUENCE.indexOf(layoutMode);
-      const next = SORT_SEQUENCE[(idx + 1) % SORT_SEQUENCE.length];
+  if (layoutCycleBtn) {
+    layoutCycleBtn.addEventListener('click', () => {
+      const idx  = LAYOUT_SEQUENCE.indexOf(layoutMode);
+      const next = LAYOUT_SEQUENCE[(idx + 1) % LAYOUT_SEQUENCE.length];
       setLayout(next, true);
     });
   }
 
-  // On resize: if breakpoint tier changed, reset override and apply auto
   let lastTier = autoTier();
-
   function checkAutoLayout() {
     const tier = autoTier();
     if (tier !== lastTier) {
@@ -301,19 +345,20 @@
     setTimeout(checkAutoLayout, 150);
   });
 
-  // --- Wait for images, then run first layout --------------------------
+  // --- Image readiness & first layout ----------------------------------
   const artImgs = Array.from(gallery.querySelectorAll('img.artwork'));
   let loadedN   = 0;
   let firstLayoutDone = false;
 
   function onImgReady() {
     loadedN++;
-    if (loadedN >= artImgs.length && !firstLayoutDone) {
+    if (loadedN >= Math.min(6, artImgs.length) && !firstLayoutDone) {
       firstLayoutDone = true;
       layout(false);
-      // Only add visible here if the intro timer hasn't already done it
-      gallery.classList.add('visible');
-      if (siteHeader) siteHeader.classList.add('visible');
+      if (introDismissed) {
+        gallery.classList.add('visible');
+        if (siteHeader) siteHeader.classList.add('visible');
+      }
     }
   }
 
@@ -326,14 +371,7 @@
     }
   });
 
-  // After intro: show gallery (images may or may not be loaded yet).
-  setTimeout(() => {
-    if (siteHeader) siteHeader.classList.add('visible');
-    gallery.classList.add('visible');
-    if (!firstLayoutDone) layout(false);
-  }, 3900);
-
-  // --- ResizeObserver for smooth responsive reflow (Width changes only) ---
+  // --- ResizeObserver for smooth responsive reflow ---------------------
   let prevWidth   = 0;
   let resizeTimer = null;
 
@@ -363,10 +401,10 @@
   let menuLeaveTimer = null;
 
   function openBothMenus() {
-    if (isAutoScrolling) return; // Never expand menus while auto-scrolling
+    if (isAutoScrolling) return;
     clearTimeout(menuLeaveTimer);
     if (artistWrap) artistWrap.classList.add('hovered');
-    if (rightWrap) rightWrap.classList.add('hovered');
+    if (rightWrap)  rightWrap.classList.add('hovered');
     if (siteHeader) siteHeader.classList.add('menu-open');
   }
 
@@ -375,12 +413,12 @@
     if (delay > 0) {
       menuLeaveTimer = setTimeout(() => {
         if (artistWrap) artistWrap.classList.remove('hovered');
-        if (rightWrap) rightWrap.classList.remove('hovered');
+        if (rightWrap)  rightWrap.classList.remove('hovered');
         if (siteHeader) siteHeader.classList.remove('menu-open', 'menu-left-open', 'menu-right-open');
       }, delay);
     } else {
       if (artistWrap) artistWrap.classList.remove('hovered');
-      if (rightWrap) rightWrap.classList.remove('hovered');
+      if (rightWrap)  rightWrap.classList.remove('hovered');
       if (siteHeader) siteHeader.classList.remove('menu-open', 'menu-left-open', 'menu-right-open');
     }
   }
@@ -401,7 +439,6 @@
     }
   }
 
-  // Bind left menu wrap
   if (artistWrap) {
     artistWrap.addEventListener('mouseenter', openBothMenus);
     artistWrap.addEventListener('mouseleave', () => closeBothMenus(300));
@@ -410,14 +447,8 @@
       if (e.stopPropagation) e.stopPropagation();
       toggleBothMenus();
     });
-    artistWrap.addEventListener('touchend', (e) => {
-      if (e.target.closest('.artist-nav__link')) return;
-      e.preventDefault();
-      toggleBothMenus();
-    }, { passive: false });
   }
 
-  // Bind right menu wrap
   if (rightWrap) {
     rightWrap.addEventListener('mouseenter', openBothMenus);
     rightWrap.addEventListener('mouseleave', () => closeBothMenus(300));
@@ -426,14 +457,8 @@
       if (e.stopPropagation) e.stopPropagation();
       toggleBothMenus();
     });
-    rightWrap.addEventListener('touchend', (e) => {
-      if (e.target.closest('.right-menu-item')) return;
-      e.preventDefault();
-      toggleBothMenus();
-    }, { passive: false });
   }
 
-  // Close menus when tapping / clicking anywhere outside
   document.addEventListener('click', (e) => {
     const clickedInsideLeft  = artistWrap && artistWrap.contains(e.target);
     const clickedInsideRight = rightWrap && rightWrap.contains(e.target);
@@ -442,13 +467,23 @@
     }
   });
 
-  document.addEventListener('touchstart', (e) => {
-    const touchedInsideLeft  = artistWrap && artistWrap.contains(e.target);
-    const touchedInsideRight = rightWrap && rightWrap.contains(e.target);
-    if (!touchedInsideLeft && !touchedInsideRight) {
-      closeBothMenus(0);
+  // --- Keyboard Focus Trap Helper -------------------------------------
+  function trapFocus(modalEl, e) {
+    if (e.key !== 'Tab') return;
+    const focusables = Array.from(modalEl.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'))
+      .filter((el) => el.offsetParent !== null);
+    if (!focusables.length) return;
+    const first = focusables[0];
+    const last  = focusables[focusables.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      last.focus();
+      e.preventDefault();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      first.focus();
+      e.preventDefault();
     }
-  }, { passive: true });
+  }
 
   // --- Glass Modal Controller (About & Contact) ------------------------
   const modal         = document.getElementById('glass-modal');
@@ -459,9 +494,9 @@
   const navLinks      = document.querySelectorAll('.artist-nav__link');
   const maiseyVideo   = document.getElementById('maisey-walk-video');
   let maiseyLoopTimer = null;
+  let lastModalTrigger = null;
 
-  // Exact tracking data from maisey_walk video: [time, pawMinX, pawMaxX, catCenter, catMinX, catMaxX]
-  const MAISEY_TRACK = [
+const MAISEY_TRACK = [
     [0.25, 0.0385, 0.1802, 0.119, 0.037, 0.201],
     [0.5, 0.0385, 0.1807, 0.118, 0.0359, 0.2],
     [0.75, 0.0385, 0.1807, 0.1198, 0.0354, 0.2042],
@@ -558,11 +593,11 @@
 
     return [
       timeSec,
-      p1[1] + (p2[1] - p1[1]) * ratio, // pawMinX
-      p1[2] + (p2[2] - p1[2]) * ratio, // pawMaxX
-      p1[3] + (p2[3] - p1[3]) * ratio, // catCenter
-      p1[4] + (p2[4] - p1[4]) * ratio, // catMinX
-      p1[5] + (p2[5] - p1[5]) * ratio  // catMaxX
+      p1[1] + (p2[1] - p1[1]) * ratio,
+      p1[2] + (p2[2] - p1[2]) * ratio,
+      p1[3] + (p2[3] - p1[3]) * ratio,
+      p1[4] + (p2[4] - p1[4]) * ratio,
+      p1[5] + (p2[5] - p1[5]) * ratio
     ];
   }
 
@@ -599,10 +634,6 @@
     if (physicsRaf) cancelAnimationFrame(physicsRaf);
     refreshTopRowChars();
 
-    const heroProfile  = document.querySelector('.about-profile-wrap');
-    const heroTitle    = document.querySelector('.about-title');
-    const heroSubtitle = document.querySelector('.about-subtitle');
-
     function stepPhysics() {
       if (!maiseyVideo || maiseyVideo.paused || maiseyVideo.ended || !modal || !modal.classList.contains('active')) {
         resetMaiseyPhysics();
@@ -616,10 +647,7 @@
       if (videoRect.width > 0 && maiseyVideo.style.opacity === '1') {
         const pawLeft  = videoRect.left + track[1] * videoRect.width;
         const pawRight = videoRect.left + track[2] * videoRect.width;
-        const catLeft  = videoRect.left + track[4] * videoRect.width;
-        const catRight = videoRect.left + track[5] * videoRect.width;
 
-        // Text underneath: bump characters stepped on by paws
         for (let i = 0; i < topRowChars.length; i++) {
           const ch = topRowChars[i];
           const r = ch.getBoundingClientRect();
@@ -650,13 +678,8 @@
     }
   }
 
-  window.addEventListener('resize', () => {
-    if (modal && modal.classList.contains('active')) {
-      refreshTopRowChars();
-    }
-  });
-
   function scheduleMaiseyWalk(delayMs = 10000) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (maiseyLoopTimer) {
       clearTimeout(maiseyLoopTimer);
       maiseyLoopTimer = null;
@@ -674,6 +697,7 @@
   }
 
   function playMaiseyWalk() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (maiseyVideo) {
       try {
         maiseyVideo.currentTime = 0;
@@ -703,16 +727,15 @@
 
   if (maiseyVideo) {
     maiseyVideo.addEventListener('ended', () => {
-      // Fade out gently after completing walk
       maiseyVideo.style.opacity = '0';
       resetMaiseyPhysics();
-      // Wait for a calm 10-second pause before starting next walk cycle
       scheduleMaiseyWalk(10000);
     });
   }
 
-  function openModal(sectionName) {
+  function openModal(sectionName, updateHistory = true) {
     if (!modal) return;
+    lastModalTrigger = document.activeElement;
     closeBothMenus(0);
     initMaiseyTextSplitting();
     const target = sectionName || 'about';
@@ -720,19 +743,36 @@
     modal.classList.add('active');
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('modal-open');
+
+    if (modalCloseBtn) {
+      modalCloseBtn.focus();
+    }
+
     if (target === 'about') {
-      scheduleMaiseyWalk(7000);
+      scheduleMaiseyWalk(5000);
+    }
+
+    if (updateHistory) {
+      history.pushState({ modal: target }, '', `/${target}`);
     }
   }
 
-  function closeModal() {
-    if (!modal) return;
+  function closeModal(updateHistory = true) {
+    if (!modal || !modal.classList.contains('active')) return;
     pauseMaiseyWalk();
     modal.classList.remove('active');
     modal.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('modal-open');
-    if (window.location.hash === '#about' || window.location.hash === '#contact') {
-      history.replaceState(null, '', window.location.pathname + window.location.search);
+
+    if (lastModalTrigger && typeof lastModalTrigger.focus === 'function') {
+      lastModalTrigger.focus();
+    }
+
+    if (updateHistory) {
+      const curPath = window.location.pathname.replace(/\/$/, '');
+      if (curPath === '/about' || curPath === '/contact' || window.location.hash) {
+        history.pushState({}, '', '/');
+      }
     }
   }
 
@@ -750,7 +790,7 @@
     });
 
     if (sectionName === 'about') {
-      scheduleMaiseyWalk(7000);
+      scheduleMaiseyWalk(5000);
     } else {
       pauseMaiseyWalk();
     }
@@ -764,26 +804,279 @@
     });
   });
 
+  const footerInquiryLink = document.getElementById('footer-inquiry-link');
+  if (footerInquiryLink) {
+    footerInquiryLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal('contact');
+    });
+  }
+
   modalTabs.forEach((tab) => {
     tab.addEventListener('click', () => {
       switchModalSection(tab.dataset.target);
+      const target = tab.dataset.target;
+      history.replaceState({ modal: target }, '', `/${target}`);
     });
   });
 
-  if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
-  if (modalBackdrop) modalBackdrop.addEventListener('click', closeModal);
+  if (modalCloseBtn) modalCloseBtn.addEventListener('click', () => closeModal(true));
+  if (modalBackdrop) modalBackdrop.addEventListener('click', () => closeModal(true));
+
+  // --- Artwork Detail View Modal Controller ----------------------------
+  const artworkModal          = document.getElementById('artwork-modal');
+  const artworkModalBackdrop  = document.getElementById('artwork-modal-backdrop');
+  const artworkModalCloseBtn  = document.getElementById('artwork-modal-close-btn');
+  const artworkModalTitle     = document.getElementById('artwork-modal-title');
+  const artworkModalImg       = document.getElementById('artwork-modal-img');
+  const artworkModalFrame     = document.getElementById('artwork-modal-frame');
+  const artworkModalFrameWrap = document.getElementById('artwork-modal-frame-wrap');
+  const artworkModalMat       = document.getElementById('artwork-modal-mat');
+  const artworkSpecMedium     = document.getElementById('artwork-spec-medium');
+  const artworkSpecYear       = document.getElementById('artwork-spec-year');
+  const artworkSpecDimensions = document.getElementById('artwork-spec-dimensions');
+  const artworkSpecAvail      = document.getElementById('artwork-spec-avail');
+  const artworkModalStory     = document.getElementById('artwork-modal-story');
+  const artworkInquireBtn     = document.getElementById('artwork-inquire-btn');
+  const artworkInstagramLink  = document.getElementById('artwork-instagram-link');
+  const artworkPrevBtn        = document.getElementById('artwork-prev-btn');
+  const artworkNextBtn        = document.getElementById('artwork-next-btn');
+  const artworkCounter        = document.getElementById('artwork-counter');
+
+  let currentArtworkIndex = 0;
+  let lastArtworkTrigger = null;
+
+  function updateArtworkModalContent(index) {
+    const post = sorted[index];
+    if (!post) return;
+    currentArtworkIndex = index;
+
+    if (artworkModalTitle) artworkModalTitle.textContent = post.title || 'Untitled Artwork';
+    
+    if (artworkSpecMedium) {
+      artworkSpecMedium.textContent = post.medium || '';
+      artworkSpecMedium.style.display = post.medium ? 'inline-block' : 'none';
+    }
+    if (artworkSpecYear) {
+      artworkSpecYear.textContent = post.year || '';
+      artworkSpecYear.style.display = post.year ? 'inline-block' : 'none';
+    }
+    if (artworkSpecDimensions) {
+      artworkSpecDimensions.textContent = post.dimensions || '';
+      artworkSpecDimensions.style.display = post.dimensions ? 'inline-block' : 'none';
+    }
+    if (artworkSpecAvail) {
+      artworkSpecAvail.textContent = post.availability || 'Available for inquiry';
+    }
+
+    if (artworkModalStory) {
+      artworkModalStory.textContent = post.story || '';
+    }
+
+    if (artworkModalImg) {
+      artworkModalImg.src = post.webp ? post.webp.full : `assets/art/${post.filename}`;
+      artworkModalImg.alt = post.alt || post.title || 'Artwork by Katherine Claye';
+    }
+
+    const isModern = currentFrameStyle === 'modern' && post.modern;
+    const activeFrame = isModern ? post.modern : post;
+    const frameSrc = isModern
+      ? `assets/frames/modern_frames_webp/${post.modern.frame.replace(/\.[^/.]+$/, '')}.webp`
+      : `assets/frames/webp/${post.frame}.webp`;
+
+    if (artworkModalFrame) {
+      artworkModalFrame.src = frameSrc;
+    }
+
+    if (artworkModalFrameWrap) {
+      artworkModalFrameWrap.style.aspectRatio = String(activeFrame.aspectRatio || post.aspectRatio || 1);
+    }
+
+    if (artworkModalMat && activeFrame.mat) {
+      artworkModalMat.style.top = `${activeFrame.mat.top}%`;
+      artworkModalMat.style.left = `${activeFrame.mat.left}%`;
+      artworkModalMat.style.width = `${activeFrame.mat.width}%`;
+      artworkModalMat.style.height = `${activeFrame.mat.height}%`;
+    }
+
+    if (artworkInstagramLink) {
+      artworkInstagramLink.href = post.url || 'https://www.instagram.com/kclaye_art/';
+    }
+
+    if (artworkCounter) {
+      artworkCounter.textContent = `${index + 1} of ${sorted.length}`;
+    }
+  }
+
+  function openArtworkModal(index) {
+    if (!artworkModal) return;
+    lastArtworkTrigger = document.activeElement;
+    closeBothMenus(0);
+    updateArtworkModalContent(index);
+    artworkModal.classList.add('active');
+    artworkModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+
+    if (artworkModalCloseBtn) {
+      artworkModalCloseBtn.focus();
+    }
+  }
+
+  function closeArtworkModal() {
+    if (!artworkModal || !artworkModal.classList.contains('active')) return;
+    artworkModal.classList.remove('active');
+    artworkModal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+
+    if (lastArtworkTrigger && typeof lastArtworkTrigger.focus === 'function') {
+      lastArtworkTrigger.focus();
+    }
+  }
+
+  if (artworkModalCloseBtn) artworkModalCloseBtn.addEventListener('click', closeArtworkModal);
+  if (artworkModalBackdrop) artworkModalBackdrop.addEventListener('click', closeArtworkModal);
+
+  if (artworkPrevBtn) {
+    artworkPrevBtn.addEventListener('click', () => {
+      const prevIdx = (currentArtworkIndex - 1 + sorted.length) % sorted.length;
+      updateArtworkModalContent(prevIdx);
+    });
+  }
+
+  if (artworkNextBtn) {
+    artworkNextBtn.addEventListener('click', () => {
+      const nextIdx = (currentArtworkIndex + 1) % sorted.length;
+      updateArtworkModalContent(nextIdx);
+    });
+  }
+
+  // --- Artwork Inquiry Action Pre-fill ---------------------------------
+  if (artworkInquireBtn) {
+    artworkInquireBtn.addEventListener('click', () => {
+      const post = sorted[currentArtworkIndex];
+      closeArtworkModal();
+      openModal('contact');
+
+      const msgInput     = document.getElementById('contact-message');
+      const subjectInput = document.getElementById('contact-subject');
+      if (msgInput && post) {
+        msgInput.value = `Hi Katherine,\n\nI'm inquiring about your artwork \"${post.title}\" (${post.year ? post.year + ', ' : ''}${post.medium || 'original'}). Could you please share more information regarding availability, details, and pricing?\n\nThank you!`;
+        msgInput.focus();
+      }
+      if (subjectInput && post) {
+        subjectInput.value = `Katherine Claye Art — Inquiry: ${post.title}`;
+      }
+    });
+  }
+
+  // --- Artwork Quick-Peek Sheet Controller ----------------------------
+  const artworkPeek         = document.getElementById('artwork-peek');
+  const artworkPeekBackdrop = document.getElementById('artwork-peek-backdrop');
+  const peekTitleEl         = document.getElementById('peek-title');
+  const peekMetaEl          = document.getElementById('peek-meta');
+  const peekInstagramLink   = document.getElementById('peek-instagram-link');
+  const peekDetailsBtn      = document.getElementById('peek-details-btn');
+
+  let peekArtworkIndex = 0;
+  let lastPeekTrigger  = null;
+
+  function openArtworkPeek(index) {
+    if (!artworkPeek) { openArtworkModal(index); return; }
+    const post = sorted[index];
+    if (!post) return;
+    peekArtworkIndex = index;
+    lastPeekTrigger  = document.activeElement;
+    closeBothMenus(0);
+
+    if (peekTitleEl) peekTitleEl.textContent = post.title || 'Untitled Artwork';
+    const parts = [post.medium, post.year, post.dimensions].filter(Boolean);
+    if (peekMetaEl) peekMetaEl.textContent = parts.join(' · ');
+    if (peekInstagramLink) peekInstagramLink.href = post.url || 'https://www.instagram.com/kclaye_art/';
+
+    artworkPeek.classList.add('active');
+    artworkPeek.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('peek-open');
+  }
+
+  function closeArtworkPeek() {
+    if (!artworkPeek || !artworkPeek.classList.contains('active')) return;
+    artworkPeek.classList.remove('active');
+    artworkPeek.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('peek-open');
+    if (lastPeekTrigger && typeof lastPeekTrigger.focus === 'function') {
+      lastPeekTrigger.focus();
+    }
+  }
+
+  if (artworkPeekBackdrop) {
+    artworkPeekBackdrop.addEventListener('click', closeArtworkPeek);
+  }
+
+  if (peekDetailsBtn) {
+    peekDetailsBtn.addEventListener('click', () => {
+      closeArtworkPeek();
+      openArtworkModal(peekArtworkIndex);
+    });
+  }
+
+  // --- Global Keyboard Handler (Escape, Arrows, Tab Trap) -------------
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
-      closeModal();
+    // 1. Modal close on Escape
+    if (e.key === 'Escape') {
+      if (artworkPeek && artworkPeek.classList.contains('active')) {
+        closeArtworkPeek();
+        return;
+      }
+      if (artworkModal && artworkModal.classList.contains('active')) {
+        closeArtworkModal();
+        return;
+      }
+      if (modal && modal.classList.contains('active')) {
+        closeModal(true);
+        return;
+      }
+    }
+
+
+    // 2. Tab focus trap
+    if (e.key === 'Tab') {
+      if (artworkModal && artworkModal.classList.contains('active')) {
+        trapFocus(artworkModal, e);
+      } else if (modal && modal.classList.contains('active')) {
+        trapFocus(modal, e);
+      }
+    }
+
+    // 3. Arrow key navigation in artwork detail modal
+    if (artworkModal && artworkModal.classList.contains('active')) {
+      if (e.key === 'ArrowLeft') {
+        const prevIdx = (currentArtworkIndex - 1 + sorted.length) % sorted.length;
+        updateArtworkModalContent(prevIdx);
+      } else if (e.key === 'ArrowRight') {
+        const nextIdx = (currentArtworkIndex + 1) % sorted.length;
+        updateArtworkModalContent(nextIdx);
+      }
     }
   });
 
-  if (window.location.hash === '#about') {
-    openModal('about');
-  } else if (window.location.hash === '#contact') {
-    openModal('contact');
+  // --- SPA Direct-Link Routing Handler --------------------------------
+  function handleRoute() {
+    const rawPath = window.location.pathname.replace(/\/$/, '');
+    const hash = window.location.hash;
+
+    if (rawPath === '/about' || hash === '#about') {
+      openModal('about', false);
+    } else if (rawPath === '/contact' || hash === '#contact') {
+      openModal('contact', false);
+    } else {
+      closeModal(false);
+    }
   }
+
+  // Check route on initial load
+  handleRoute();
+  window.addEventListener('popstate', handleRoute);
 
   // --- Contact Form Handling (FormSubmit Email Routing) ----------------
   const contactForm = document.getElementById('contact-form');
@@ -805,7 +1098,7 @@
       if (!name || !email || !msg) {
         if (formStatus) {
           formStatus.className = 'form-status error';
-          formStatus.textContent = 'Please fill out all fields before sending.';
+          formStatus.textContent = 'Please complete all fields before sending.';
         }
         return;
       }
@@ -838,14 +1131,14 @@
       .catch((error) => {
         if (formStatus) {
           formStatus.className = 'form-status error';
-          formStatus.innerHTML = `Unable to send message directly. Please try again or email <strong>cgillis15@gmail.com</strong>.`;
+          formStatus.innerHTML = `Unable to submit directly. Please send your message directly to <strong>cgillis15@gmail.com</strong>.`;
         }
       })
       .finally(() => {
         if (submitBtn) {
           submitBtn.disabled = false;
           const btnText = submitBtn.querySelector('.btn-text');
-          if (btnText) btnText.textContent = 'Send';
+          if (btnText) btnText.textContent = 'send inquiry';
         }
       });
     });
@@ -870,27 +1163,28 @@
       autoScrollBtn.classList.remove('playing');
       autoScrollBtn.setAttribute('aria-pressed', 'false');
       autoScrollBtn.textContent = 'play';
+      autoScrollBtn.setAttribute('aria-label', 'Toggle auto-scroll slideshow: currently paused');
     }
   }
 
   function startAutoScroll() {
     if (isAutoScrolling) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     isAutoScrolling     = true;
     autoScrollStartTime = Date.now();
 
     document.body.classList.add('is-autoscrolling');
     if (siteHeader) siteHeader.classList.add('auto-scrolling', 'scrolled-down');
-
-    // Immediately close both menus when PLAY starts
     closeBothMenus(0);
-    
+
     if (autoScrollBtn) {
       autoScrollBtn.classList.add('playing');
       autoScrollBtn.setAttribute('aria-pressed', 'true');
       autoScrollBtn.textContent = 'pause';
+      autoScrollBtn.setAttribute('aria-label', 'Toggle auto-scroll slideshow: currently playing');
     }
 
-    const scrollSpeed = 1.1; // Smooth, peaceful exhibition scroll speed
+    const scrollSpeed = 1.1;
     let lastTime = performance.now();
 
     function step(now) {
@@ -929,8 +1223,6 @@
     autoScrollBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-
-      // Immediately close both menus on PLAY click
       closeBothMenus(0);
       if (document.activeElement && typeof document.activeElement.blur === 'function') {
         document.activeElement.blur();
@@ -943,7 +1235,6 @@
       }
     });
 
-    // Pause auto-scroll gracefully on intentional manual user interaction
     window.addEventListener('wheel', (e) => {
       if (isAutoScrolling && Date.now() - autoScrollStartTime > 600 && Math.abs(e.deltaY) > 3) {
         stopAutoScroll();
@@ -977,10 +1268,15 @@
   let currentFrameStyle  = 'eclectic';
 
   if (frameStyleToggle) {
+    frameStyleToggle.setAttribute('aria-pressed', 'false');
+    frameStyleToggle.setAttribute('aria-label', 'Toggle frame style: currently eclectic');
+
     frameStyleToggle.addEventListener('click', () => {
       currentFrameStyle = currentFrameStyle === 'eclectic' ? 'modern' : 'eclectic';
-      frameStyleToggle.classList.toggle('modern', currentFrameStyle === 'modern');
-      // Button label stays "FRAMES" — the visual gallery change communicates the state
+      const isModern = currentFrameStyle === 'modern';
+      frameStyleToggle.classList.toggle('modern', isModern);
+      frameStyleToggle.setAttribute('aria-pressed', String(isModern));
+      frameStyleToggle.setAttribute('aria-label', `Toggle frame style: currently ${currentFrameStyle}`);
 
       items.forEach((item, index) => {
         const post     = sorted[index];
@@ -988,17 +1284,15 @@
         const frameImg = item.el.querySelector('.frame-overlay');
         const matDiv   = item.el.querySelector('.art-mat');
 
-        // Trigger staggered ripple wave animation
         const staggerDelay = index * 35;
         setTimeout(() => {
           item.el.classList.add('frame-switching');
 
-          // Midway through the morph flip, swap image & mat
           setTimeout(() => {
             frameImg.style.opacity = '0';
 
             if (currentFrameStyle === 'modern' && post.modern) {
-              frameImg.src        = `assets/frames/modern frames/${post.modern.frame}`;
+              frameImg.src        = `assets/frames/modern_frames_webp/${post.modern.frame.replace(/\.[^/.]+$/, '')}.webp`;
               matDiv.style.top    = `${post.modern.mat.top}%`;
               matDiv.style.left   = `${post.modern.mat.left}%`;
               matDiv.style.width  = `${post.modern.mat.width}%`;
@@ -1006,7 +1300,7 @@
               item.aspect         = post.modern.aspectRatio || post.aspectRatio;
               wrapDiv.style.aspectRatio = String(item.aspect);
             } else {
-              frameImg.src        = `assets/frames/${post.frame}.png`;
+              frameImg.src        = `assets/frames/webp/${post.frame}.webp`;
               if (post.mat) {
                 matDiv.style.top    = `${post.mat.top}%`;
                 matDiv.style.left   = `${post.mat.left}%`;
@@ -1024,17 +1318,20 @@
             });
           }, 160);
 
-          // Remove switching class after flip finishes
           setTimeout(() => {
             item.el.classList.remove('frame-switching');
           }, 550);
         }, staggerDelay);
       });
 
-      // Smoothly re-layout grid to accommodate any subtle modern frame aspect ratio adjustments
       setTimeout(() => {
         layout(true);
       }, 200);
+
+      // If artwork modal is currently open, update its frame as well
+      if (artworkModal && artworkModal.classList.contains('active')) {
+        updateArtworkModalContent(currentArtworkIndex);
+      }
     });
   }
 
