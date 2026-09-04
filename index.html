@@ -3,28 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Katherine Claye — Art</title>
-  <meta name="description" content="Portfolio of Katherine Claye — original paintings and illustrations.">
+  <title>Katherine Claye — Paintings &amp; Works on Paper</title>
+  <meta name="description" content="Portfolio of Katherine Claye — original paintings, works on paper, pet portraits, and architectural studies based in Monroe, Louisiana.">
+  <link rel="canonical" href="https://kclayeart.netlify.app/">
 
   <!-- Open Graph / link preview -->
-  <meta property="og:title" content="Katherine Claye — Art">
-  <meta property="og:description" content="Original paintings and illustrations by Katherine Claye.">
+  <meta property="og:site_name" content="Katherine Claye Art">
+  <meta property="og:title" content="Katherine Claye — Paintings &amp; Works on Paper">
+  <meta property="og:description" content="Portfolio of Katherine Claye — original paintings, works on paper, pet portraits, and architectural studies.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://kclayeart.netlify.app">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:url" content="https://kclayeart.netlify.app/">
   <meta property="og:image" content="https://kclayeart.netlify.app/assets/og-preview.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Painting by Katherine Claye in an ornate gold frame">
+  <meta property="og:image:alt" content="Original painting by Katherine Claye displayed in an ornate exhibition frame">
 
   <!-- Twitter / X Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Katherine Claye — Art">
-  <meta name="twitter:description" content="Original paintings and illustrations by Katherine Claye.">
+  <meta name="twitter:title" content="Katherine Claye — Paintings &amp; Works on Paper">
+  <meta name="twitter:description" content="Portfolio of Katherine Claye — original paintings, works on paper, pet portraits, and architectural studies.">
   <meta name="twitter:image" content="https://kclayeart.netlify.app/assets/og-preview.jpg">
+  <meta name="twitter:image:alt" content="Original painting by Katherine Claye displayed in an ornate exhibition frame">
 
+  <!-- Preconnect & Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Glook&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Glook&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- JSON-LD Structured Data: VisualArtist and ImageGallery -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "VisualArtist",
+        "@id": "https://kclayeart.netlify.app/#artist",
+        "name": "Katherine Claye",
+        "alternateName": "Claye Gillis",
+        "url": "https://kclayeart.netlify.app/",
+        "image": "https://kclayeart.netlify.app/assets/og-preview.jpg",
+        "sameAs": [
+          "https://www.instagram.com/kclaye_art/"
+        ],
+        "jobTitle": "Visual Artist",
+        "knowsAbout": ["Painting", "Acrylic", "Watercolor", "Works on paper", "Pet portraits", "House portraits"],
+        "description": "Artist based in Monroe, Louisiana creating original paintings, works on paper, architectural home portraits, and custom commissions."
+      },
+      {
+        "@type": "ImageGallery",
+        "@id": "https://kclayeart.netlify.app/#gallery",
+        "name": "Katherine Claye Art Portfolio",
+        "url": "https://kclayeart.netlify.app/",
+        "creator": {
+          "@id": "https://kclayeart.netlify.app/#artist"
+        }
+      }
+    ]
+  }
+  </script>
 
   <script>
     (function() {
@@ -36,20 +73,34 @@
     })();
   </script>
 
-  <link rel="stylesheet" href="css/style.css?v=c388d120">
+  <link rel="stylesheet" href="css/style.css?v=a1bd1f42">
+
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "yd9hlxdtfx");
+  </script>
+
+  <!-- Cloudflare Web Analytics -->
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "774c956894c64e95a1557ca91a52564f"}'></script>
+
 </head>
 <body>
 
-  <!-- ── Intro overlay ─────────────────────────────────────────── -->
-  <div id="intro-overlay" class="intro-overlay" aria-hidden="true">
-    <h1 class="intro-text">katherine claye</h1>
+  <!-- ── Intro overlay (dismissible and fast) ────────────────────── -->
+  <div id="intro-overlay" class="intro-overlay" aria-hidden="true" title="Click or press any key to skip intro">
+    <div class="intro-text">katherine claye</div>
+    <span class="intro-skip-hint">click to enter</span>
   </div>
 
-  <!-- ── Touch-hint overlay (appears after intro, fades out after ~3.5s) ── -->
+  <!-- ── Touch-hint overlay ─────────────────────────────────────── -->
   <div id="touch-hint" class="touch-hint" aria-hidden="true">
     <div class="touch-hint__card">
       <div class="touch-hint__icon-wrap">
-        <svg class="touch-hint__frame-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg class="touch-hint__frame-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="3" y="3" width="18" height="18" rx="3.5" ry="3.5"/>
           <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
           <polyline points="21 15 16 10 5 21"/>
@@ -57,44 +108,55 @@
         <span class="touch-hint__tap-ripple"></span>
         <span class="touch-hint__tap-dot"></span>
       </div>
-      <span class="touch-hint__text">tap artwork</span>
+      <span class="touch-hint__text">tap artwork to inspect</span>
     </div>
   </div>
 
-  <!-- ── Persistent header (fades in after intro) ──────────────── -->
+  <!-- ── Persistent header ──────────────────────────────────────── -->
   <header id="site-header" class="site-header">
-    <!-- Single unified edge-to-edge morphing glass blur background bar -->
     <div class="site-header__static-glass" aria-hidden="true"></div>
 
     <!-- Left: artist name with CSS-animated nav -->
     <div class="artist-name-wrap" id="artist-name-wrap">
-      <!-- Nav labels — cycle one at a time when idle, both on hover -->
-      <nav class="artist-nav" aria-label="Site navigation">
-        <a href="#contact" class="artist-nav__link artist-nav__contact" data-nav="contact">contact</a>
-        <a href="#about"   class="artist-nav__link artist-nav__about"   data-nav="about">about</a>
+      <nav class="artist-nav" aria-label="Artist navigation">
+        <a href="/contact" class="artist-nav__link artist-nav__contact" data-nav="contact">contact</a>
+        <a href="/about"   class="artist-nav__link artist-nav__about"   data-nav="about">about</a>
       </nav>
-      <!-- The name itself -->
       <span class="artist-name" aria-label="Katherine Claye">katherine claye</span>
     </div>
 
-    <!-- Right: collapsible text menu -->
+    <!-- Right: collapsible gallery controls menu -->
     <div class="right-menu-wrap" id="right-menu-wrap">
-      <!-- The MENU label -->
-      <span class="right-menu-label" aria-label="Menu">menu</span>
-      <!-- Dropdown nav items -->
+      <span class="right-menu-label" aria-label="Gallery menu">menu</span>
       <nav class="right-menu-nav" aria-label="Gallery controls">
-        <button id="auto-scroll-toggle"  class="right-menu-item right-menu-item--play"  aria-label="Auto-scroll gallery">play</button>
-        <button id="sort-cycle-btn"      class="right-menu-item right-menu-item--sort"  aria-label="Cycle gallery columns">sort</button>
-        <button id="frame-style-toggle"  class="right-menu-item right-menu-item--frame" aria-label="Toggle frame style">frames</button>
-        <button id="theme-toggle"        class="right-menu-item right-menu-item--theme" aria-label="Toggle light / dark mode">light</button>
+        <button id="auto-scroll-toggle" class="right-menu-item right-menu-item--play" aria-label="Toggle auto-scroll slideshow" aria-pressed="false">play</button>
+        <button id="layout-cycle-btn"   class="right-menu-item right-menu-item--layout" aria-label="Cycle gallery layout columns" aria-pressed="false">layout</button>
+        <button id="frame-style-toggle" class="right-menu-item right-menu-item--frame" aria-label="Toggle between eclectic and modern frames" aria-pressed="false">frames</button>
+        <button id="theme-toggle"       class="right-menu-item right-menu-item--theme" aria-label="Toggle light or dark theme" aria-pressed="false">light</button>
       </nav>
     </div>
   </header>
 
-  <!-- ── Gallery ───────────────────────────────────────────────── -->
-  <main id="gallery" class="gallery" aria-label="Artwork gallery">
-    <!-- Items injected by main.js -->
+  <!-- ── Gallery Landmark ──────────────────────────────────────── -->
+  <main id="main-content" class="main-content">
+    <h1 class="sr-only">Katherine Claye — Paintings and works on paper</h1>
+    <div id="gallery" class="gallery" aria-label="Artwork gallery">
+      <!-- Items injected by main.js -->
+    </div>
   </main>
+
+  <!-- ── Consistent Brand Footer ───────────────────────────────── -->
+  <footer class="site-footer">
+    <div class="site-footer__content">
+      <span class="site-footer__artist">Katherine Claye</span>
+      <span class="site-footer__copyright">&copy; 2026 Katherine Claye. All rights reserved.</span>
+      <div class="site-footer__links">
+        <a href="https://www.instagram.com/kclaye_art/" target="_blank" rel="noopener noreferrer" class="site-footer__link" aria-label="Follow Katherine Claye on Instagram (@kclaye_art)">Instagram</a>
+        <span class="site-footer__divider" aria-hidden="true">&bull;</span>
+        <a href="/contact" class="site-footer__link site-footer__inquiry-link" id="footer-inquiry-link">Inquire</a>
+      </div>
+    </div>
+  </footer>
 
   <!-- ── Glassmorphism Modal (About & Contact) ──────────────────── -->
   <div id="glass-modal" class="glass-modal" role="dialog" aria-modal="true" aria-hidden="true">
@@ -105,9 +167,9 @@
         <!-- Modal Top Bar: Section tabs & Close button -->
         <div class="glass-modal__header">
           <nav class="glass-modal__tabs" aria-label="Modal section navigation">
-            <button type="button" class="glass-modal__tab active" data-target="about" id="tab-about">about</button>
+            <button type="button" class="glass-modal__tab active" data-target="about" id="tab-about" aria-selected="true">about</button>
             <span class="glass-modal__tab-divider" aria-hidden="true">/</span>
-            <button type="button" class="glass-modal__tab" data-target="contact" id="tab-contact">contact</button>
+            <button type="button" class="glass-modal__tab" data-target="contact" id="tab-contact" aria-selected="false">contact</button>
           </nav>
 
           <button type="button" class="glass-modal__close" id="modal-close-btn" aria-label="Close dialog">
@@ -125,31 +187,30 @@
           <section id="modal-section-about" class="glass-modal__section active" data-section="about" aria-labelledby="tab-about">
             <div class="about-container">
               
-              <!-- Hero header (z-index above walking cat so cat walks behind profile, title, subtitle) -->
               <div class="about-hero">
                 <div class="about-profile-wrap">
-                  <img src="assets/claye-portrait.jpg" alt="Claye Gillis" class="about-profile-img" loading="lazy">
+                  <img src="assets/claye-portrait.jpg" alt="Katherine Claye portrait" class="about-profile-img" loading="lazy" width="300" height="300">
                 </div>
-                <h2 class="about-title">Claye Gillis</h2>
+                <h2 class="about-title">Katherine Claye</h2>
                 <p class="about-subtitle">Original Paintings &amp; Works on Paper</p>
               </div>
 
-              <!-- Body wrap with Maisey walking video anchored directly to the top pixel of the text -->
+              <!-- Body wrap with Maisey walking video anchored directly to top pixel of text -->
               <div class="about-body-wrap">
                 <div class="maisey-walk-container" id="maisey-walk-container" aria-hidden="true">
-                  <video id="maisey-walk-video" class="maisey-walk-video" playsinline muted preload="auto">
+                  <video id="maisey-walk-video" class="maisey-walk-video" playsinline muted preload="none" poster="assets/videos/maisey_poster.webp">
+                    <source src="assets/videos/maisey_walk.webm" type='video/webm; codecs="vp9"'>
                     <source src="assets/videos/maisey_walk.mov" type='video/mp4; codecs="hvc1"'>
                     <source src="assets/videos/maisey_walk.mov" type="video/quicktime">
-                    <source src="assets/videos/maisey_walk.webm" type='video/webm; codecs="vp9"'>
                   </video>
                 </div>
                 
                 <div class="about-text-flow">
-                  <p>Claye Gillis (b. 1997) is an artist currently based in Monroe, Louisiana. Originally from Alabama, she earned her Bachelor of Fine Arts in Studio Art from Auburn University in 2020 and has continued developing her practice through painting, drawing, and commissioned work.</p>
-                  <p>Working primarily in acrylic and watercolor, Claye’s work is expressive and ever-evolving, often combining loose brushwork, texture, color, and drawn elements. She enjoys exploring a variety of subjects and materials rather than limiting herself to a single style. Her work is inspired by nature, travel, people, interiors, music, and the everyday details that make a place or moment feel meaningful.</p>
-                  <p>Art has also been a part of Claye’s life through her family. Her grandmother, a landscape painter, has been a lasting source of inspiration and helped shape her appreciation for painting and the natural world.</p>
-                  <p>Through social media, Claye shares finished pieces alongside glimpses into her creative process and the continued evolution of her work.</p>
-                  <p>When she isn’t painting, Claye can usually be found trying a new recipe, spending time outdoors, rearranging something in her home, or hanging out with her cat, Maisey.</p>
+                  <p>Katherine Claye (b. 1997) is an artist currently based in Monroe, Louisiana. Originally from Alabama, she earned her Bachelor of Fine Arts in Studio Art from Auburn University in 2020 and has continued developing her practice through painting, drawing, and commissioned work.</p>
+                  <p>Working primarily in acrylic and watercolor, Katherine’s work is expressive and ever-evolving, often combining loose brushwork, texture, color, and drawn elements. She enjoys exploring a variety of subjects and materials rather than limiting herself to a single style. Her work is inspired by nature, travel, people, interiors, music, and the everyday details that make a place or moment feel meaningful.</p>
+                  <p>Art has also been a part of Katherine’s life through her family. Her grandmother, a landscape painter, has been a lasting source of inspiration and helped shape her appreciation for painting and the natural world.</p>
+                  <p>Through social media, Katherine shares finished pieces alongside glimpses into her creative process and the continued evolution of her work.</p>
+                  <p>When she isn’t painting, Katherine can usually be found trying a new recipe, spending time outdoors, rearranging something in her home, or hanging out with her cat, Maisey.</p>
                 </div>
               </div>
             </div>
@@ -158,21 +219,26 @@
           <!-- ── Section: Contact ──────────────────────── -->
           <section id="modal-section-contact" class="glass-modal__section" data-section="contact" aria-labelledby="tab-contact">
             <div class="contact-wrap">
+              <div class="contact-intro">
+                <h2 class="contact-title">Katherine Claye Studio</h2>
+                <p class="contact-desc">For inquiries regarding available originals, commissions, or collaborations, please send a message below or email directly at <a href="mailto:cgillis15@gmail.com" class="contact-email-link">cgillis15@gmail.com</a>.</p>
+              </div>
+
               <form class="contact-form" id="contact-form" action="https://formsubmit.co/ajax/cgillis15@gmail.com" method="POST">
-                <input type="hidden" name="_subject" value="Katherine Claye Art — New Message">
+                <input type="hidden" name="_subject" id="contact-subject" value="Katherine Claye Art — New Message">
                 <input type="hidden" name="_template" value="table">
                 <input type="hidden" name="_captcha" value="false">
                 <div class="form-group">
-                  <input type="text" id="contact-name" name="name" class="form-input" placeholder="name" aria-label="name" required autocomplete="name">
+                  <input type="text" id="contact-name" name="name" class="form-input" placeholder="name" aria-label="Your Name" required autocomplete="name">
                 </div>
                 <div class="form-group">
-                  <input type="email" id="contact-email" name="email" class="form-input" placeholder="email" aria-label="email" required autocomplete="email">
+                  <input type="email" id="contact-email" name="email" class="form-input" placeholder="email" aria-label="Your Email Address" required autocomplete="email">
                 </div>
                 <div class="form-group">
-                  <textarea id="contact-message" name="message" class="form-textarea" rows="4" placeholder="message" aria-label="message" required></textarea>
+                  <textarea id="contact-message" name="message" class="form-textarea" rows="5" placeholder="message or artwork inquiry..." aria-label="Message or inquiry" required></textarea>
                 </div>
-                <button type="submit" class="contact-submit-btn" id="contact-submit-btn">
-                  <span class="btn-text">send</span>
+                <button type="submit" class="contact-submit-btn" id="contact-submit-btn" aria-label="Send message to Katherine Claye">
+                  <span class="btn-text">send inquiry</span>
                   <svg class="btn-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <line x1="22" y1="2" x2="11" y2="13"/>
                     <polygon points="22 2 15 22 11 13 2 9 22 2"/>
@@ -188,7 +254,88 @@
     </div>
   </div>
 
-  <script src="js/data.js?v=ccf19819"></script>
-  <script src="js/main.js?v=f7902142"></script>
+  <!-- ── Artwork Detail View Modal ──────────────────────────────── -->
+  <div id="artwork-modal" class="artwork-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="artwork-modal-title">
+    <div class="artwork-modal__backdrop" id="artwork-modal-backdrop"></div>
+    <div class="artwork-modal__container">
+      <div class="artwork-modal__card">
+        <button type="button" class="artwork-modal__close" id="artwork-modal-close-btn" aria-label="Close artwork view">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+
+        <div class="artwork-modal__content">
+          <!-- Artwork Image Pane with Frame -->
+          <div class="artwork-modal__image-pane">
+            <div class="artwork-modal__frame-wrap" id="artwork-modal-frame-wrap">
+              <div class="artwork-modal__mat" id="artwork-modal-mat">
+                <img id="artwork-modal-img" class="artwork-modal__img" src="" alt="">
+              </div>
+              <img id="artwork-modal-frame" class="artwork-modal__frame" src="" alt="" aria-hidden="true">
+            </div>
+          </div>
+
+          <!-- Artwork Details & Actions Pane -->
+          <div class="artwork-modal__info-pane">
+            <div class="artwork-modal__meta">
+              <h2 id="artwork-modal-title" class="artwork-modal__title"></h2>
+              
+              <div class="artwork-modal__specs" id="artwork-modal-specs">
+                <span id="artwork-spec-medium" class="artwork-spec"></span>
+                <span id="artwork-spec-year" class="artwork-spec"></span>
+                <span id="artwork-spec-dimensions" class="artwork-spec"></span>
+                <span id="artwork-spec-avail" class="artwork-spec artwork-spec--avail"></span>
+              </div>
+
+              <p id="artwork-modal-story" class="artwork-modal__story"></p>
+
+              <div class="artwork-modal__actions">
+                <button type="button" id="artwork-inquire-btn" class="artwork-inquire-btn">
+                  <span>Inquire about this piece</span>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                  </svg>
+                </button>
+
+                <a id="artwork-instagram-link" href="#" target="_blank" rel="noopener noreferrer" class="artwork-instagram-link">
+                  <span>View on Instagram</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                  </svg>
+                </a>
+              </div>
+
+              <!-- Previous / Next Gallery Navigation -->
+              <div class="artwork-modal__nav">
+                <button type="button" id="artwork-prev-btn" class="artwork-nav-btn" aria-label="Previous artwork">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="15 18 9 12 15 6"/>
+                  </svg>
+                  <span>Prev</span>
+                </button>
+                <span id="artwork-counter" class="artwork-counter" aria-live="polite"></span>
+                <button type="button" id="artwork-next-btn" class="artwork-nav-btn" aria-label="Next artwork">
+                  <span>Next</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js?v=2ba4df74"></script>
+  <script src="js/main.js?v=d9cc7339"></script>
 </body>
 </html>
