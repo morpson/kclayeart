@@ -193,10 +193,10 @@
     link.appendChild(wrap);
     gallery.appendChild(link);
 
-    // Click opens quick-peek sheet; keyboard opens full detail modal
+    // Clicking artwork always brings selected art into larger full view (with details) in one click
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      openArtworkPeek(index);
+      openArtworkModal(index);
     });
     link.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -969,65 +969,11 @@ const MAISEY_TRACK = [
     });
   }
 
-  // --- Artwork Quick-Peek Sheet Controller ----------------------------
-  const artworkPeek         = document.getElementById('artwork-peek');
-  const artworkPeekBackdrop = document.getElementById('artwork-peek-backdrop');
-  const peekTitleEl         = document.getElementById('peek-title');
-  const peekMetaEl          = document.getElementById('peek-meta');
-  const peekInstagramLink   = document.getElementById('peek-instagram-link');
-  const peekDetailsBtn      = document.getElementById('peek-details-btn');
-
-  let peekArtworkIndex = 0;
-  let lastPeekTrigger  = null;
-
-  function openArtworkPeek(index) {
-    if (!artworkPeek) { openArtworkModal(index); return; }
-    const post = sorted[index];
-    if (!post) return;
-    peekArtworkIndex = index;
-    lastPeekTrigger  = document.activeElement;
-    closeBothMenus(0);
-
-    if (peekTitleEl) peekTitleEl.textContent = post.title || 'Untitled Artwork';
-    const parts = [post.medium, post.year, post.dimensions].filter(Boolean);
-    if (peekMetaEl) peekMetaEl.textContent = parts.join(' · ');
-    if (peekInstagramLink) peekInstagramLink.href = post.url || 'https://www.instagram.com/kclaye_art/';
-
-    artworkPeek.classList.add('active');
-    artworkPeek.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('peek-open');
-  }
-
-  function closeArtworkPeek() {
-    if (!artworkPeek || !artworkPeek.classList.contains('active')) return;
-    artworkPeek.classList.remove('active');
-    artworkPeek.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('peek-open');
-    if (lastPeekTrigger && typeof lastPeekTrigger.focus === 'function') {
-      lastPeekTrigger.focus();
-    }
-  }
-
-  if (artworkPeekBackdrop) {
-    artworkPeekBackdrop.addEventListener('click', closeArtworkPeek);
-  }
-
-  if (peekDetailsBtn) {
-    peekDetailsBtn.addEventListener('click', () => {
-      closeArtworkPeek();
-      openArtworkModal(peekArtworkIndex);
-    });
-  }
-
   // --- Global Keyboard Handler (Escape, Arrows, Tab Trap) -------------
 
   document.addEventListener('keydown', (e) => {
     // 1. Modal close on Escape
     if (e.key === 'Escape') {
-      if (artworkPeek && artworkPeek.classList.contains('active')) {
-        closeArtworkPeek();
-        return;
-      }
       if (artworkModal && artworkModal.classList.contains('active')) {
         closeArtworkModal();
         return;
