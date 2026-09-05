@@ -1243,7 +1243,7 @@ body.modal-open {
   color: #111111;
   margin-bottom: 4px;
   line-height: 1.2;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6), 0 0 14px rgba(255, 255, 255, 0.45);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3), 0 0 14px rgba(255, 255, 255, 0.2);
 }
 
 [data-theme="dark"] .about-title {
@@ -1261,7 +1261,7 @@ body.modal-open {
   color: #27272a;
   font-weight: 700;
   margin-bottom: 0;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.55), 0 0 12px rgba(255, 255, 255, 0.4);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.28), 0 0 12px rgba(255, 255, 255, 0.18);
 }
 
 [data-theme="dark"] .about-subtitle {
