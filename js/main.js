@@ -135,7 +135,8 @@
     const sorted = [...POSTS_DATA];
 
     const items = sorted.map((post, index) => {
-      const aspect = post.aspectRatio || 1;
+      // Default style is modern — use modern aspect ratio if available
+      const aspect = (post.modern ? post.modern.aspectRatio : null) || post.aspectRatio || 1;
       const link = document.createElement('a');
       link.href = '#artwork-' + (post.id || (index + 1));
       link.className = 'art-link';
@@ -151,11 +152,13 @@
 
       const mat = document.createElement('div');
       mat.className = 'art-mat';
-      if (post.mat) {
-        mat.style.top = `${post.mat.top}%`;
-        mat.style.left = `${post.mat.left}%`;
-        mat.style.width = `${post.mat.width}%`;
-        mat.style.height = `${post.mat.height}%`;
+      // Start with modern mat if available, eclectic mat otherwise
+      const initMat = post.modern ? post.modern.mat : post.mat;
+      if (initMat) {
+        mat.style.top = `${initMat.top}%`;
+        mat.style.left = `${initMat.left}%`;
+        mat.style.width = `${initMat.width}%`;
+        mat.style.height = `${initMat.height}%`;
       } else {
         mat.style.inset = '12%';
       }
@@ -186,10 +189,22 @@
 
       const frame = document.createElement('img');
       frame.className = 'frame-overlay';
-      frame.src = `assets/frames/webp/${post.frame}.webp`;
+      // Default style is modern — use modern frame if available, else eclectic
+      const initModern = post.modern;
+      frame.src = initModern
+        ? `assets/frames/modern_frames_webp/${post.modern.frame.replace(/\.[^/.]+$/, '')}.webp`
+        : `assets/frames/webp/${post.frame}.webp`;
       frame.alt = '';
       frame.setAttribute('aria-hidden', 'true');
       frame.loading = index < 3 ? 'eager' : 'lazy';
+
+      // Set mat to modern position if available
+      if (initModern) {
+        mat.style.top = `${post.modern.mat.top}%`;
+        mat.style.left = `${post.modern.mat.left}%`;
+        mat.style.width = `${post.modern.mat.width}%`;
+        mat.style.height = `${post.modern.mat.height}%`;
+      }
 
       mat.appendChild(art);
       wrap.appendChild(mat);
@@ -978,7 +993,7 @@
         artworkModalImg.alt = post.alt || post.title || 'Artwork by Katherine Claye';
       }
 
-      const isModern = currentFrameStyle === 'modern' && post.modern;
+      const isModern = useModernForIndex(index);
       const activeFrame = isModern ? post.modern : post;
       const frameSrc = isModern
         ? `assets/frames/modern_frames_webp/${post.modern.frame.replace(/\.[^/.]+$/, '')}.webp`
@@ -1315,56 +1330,96 @@
       });
     }
 
-    // --- Frame style toggle (Eclectic <-> Modern) -------------------------
+    // --- Frame style toggle (Modern → Eclectic → Mix) --------------------
     const frameStyleToggle = document.getElementById('frame-style-toggle');
-    let currentFrameStyle = 'eclectic';
+    // Cycle order: modern → eclectic → mix
+    const FRAME_STYLE_CYCLE = ['modern', 'eclectic', 'mix'];
+    let currentFrameStyle = 'modern';
+
+    // Per-item mix assignments: true = use modern frame, false = use eclectic.
+    // Regenerated each time mix mode is entered.
+    let mixAssignments = [];
+
+    function generateMixAssignments() {
+      mixAssignments = sorted.map((post) => {
+        // Only assign modern if the post actually has a modern frame
+        return post.modern ? Math.random() < 0.5 : false;
+      });
+    }
+
+    // Returns true if this item should use its modern frame given current style
+    function useModernForIndex(index) {
+      const post = sorted[index];
+      if (!post) return false;
+      if (currentFrameStyle === 'modern') return !!post.modern;
+      if (currentFrameStyle === 'mix') return !!post.modern && mixAssignments[index];
+      return false; // eclectic
+    }
+
+    function applyFrameToItem(item, index) {
+      const post = sorted[index];
+      if (!post) return;
+      const wrapDiv = item.el.querySelector('.art-frame-wrap');
+      const frameImg = item.el.querySelector('.frame-overlay');
+      const matDiv = item.el.querySelector('.art-mat');
+
+      const useModern = useModernForIndex(index);
+
+      if (useModern) {
+        frameImg.src = `assets/frames/modern_frames_webp/${post.modern.frame.replace(/\.[^/.]+$/, '')}.webp`;
+        matDiv.style.top = `${post.modern.mat.top}%`;
+        matDiv.style.left = `${post.modern.mat.left}%`;
+        matDiv.style.width = `${post.modern.mat.width}%`;
+        matDiv.style.height = `${post.modern.mat.height}%`;
+        item.aspect = post.modern.aspectRatio || post.aspectRatio;
+        wrapDiv.style.aspectRatio = String(item.aspect);
+      } else {
+        frameImg.src = `assets/frames/webp/${post.frame}.webp`;
+        if (post.mat) {
+          matDiv.style.top = `${post.mat.top}%`;
+          matDiv.style.left = `${post.mat.left}%`;
+          matDiv.style.width = `${post.mat.width}%`;
+          matDiv.style.height = `${post.mat.height}%`;
+        } else {
+          matDiv.style.inset = '12%';
+        }
+        item.aspect = post.aspectRatio;
+        wrapDiv.style.aspectRatio = String(item.aspect);
+      }
+    }
+
+    function updateFrameToggleButton() {
+      if (!frameStyleToggle) return;
+      frameStyleToggle.classList.toggle('modern', currentFrameStyle === 'modern');
+      frameStyleToggle.classList.toggle('mix', currentFrameStyle === 'mix');
+      frameStyleToggle.setAttribute('aria-pressed', currentFrameStyle !== 'eclectic' ? 'true' : 'false');
+      frameStyleToggle.setAttribute('aria-label', `Cycle frame style: currently ${currentFrameStyle}`);
+    }
+
+    // Apply initial style (modern) on load — no animation needed
+    updateFrameToggleButton();
 
     if (frameStyleToggle) {
-      frameStyleToggle.setAttribute('aria-pressed', 'false');
-      frameStyleToggle.setAttribute('aria-label', 'Toggle frame style: currently eclectic');
-
       frameStyleToggle.addEventListener('click', () => {
-        currentFrameStyle = currentFrameStyle === 'eclectic' ? 'modern' : 'eclectic';
-        const isModern = currentFrameStyle === 'modern';
-        frameStyleToggle.classList.toggle('modern', isModern);
-        frameStyleToggle.setAttribute('aria-pressed', String(isModern));
-        frameStyleToggle.setAttribute('aria-label', `Toggle frame style: currently ${currentFrameStyle}`);
+        const idx = FRAME_STYLE_CYCLE.indexOf(currentFrameStyle);
+        currentFrameStyle = FRAME_STYLE_CYCLE[(idx + 1) % FRAME_STYLE_CYCLE.length];
+
+        // Generate fresh random assignments whenever entering mix mode
+        if (currentFrameStyle === 'mix') {
+          generateMixAssignments();
+        }
+
+        updateFrameToggleButton();
 
         items.forEach((item, index) => {
-          const post = sorted[index];
-          const wrapDiv = item.el.querySelector('.art-frame-wrap');
-          const frameImg = item.el.querySelector('.frame-overlay');
-          const matDiv = item.el.querySelector('.art-mat');
-
           const staggerDelay = index * 35;
           setTimeout(() => {
             item.el.classList.add('frame-switching');
+            const frameImg = item.el.querySelector('.frame-overlay');
 
             setTimeout(() => {
               frameImg.style.opacity = '0';
-
-              if (currentFrameStyle === 'modern' && post.modern) {
-                frameImg.src = `assets/frames/modern_frames_webp/${post.modern.frame.replace(/\.[^/.]+$/, '')}.webp`;
-                matDiv.style.top = `${post.modern.mat.top}%`;
-                matDiv.style.left = `${post.modern.mat.left}%`;
-                matDiv.style.width = `${post.modern.mat.width}%`;
-                matDiv.style.height = `${post.modern.mat.height}%`;
-                item.aspect = post.modern.aspectRatio || post.aspectRatio;
-                wrapDiv.style.aspectRatio = String(item.aspect);
-              } else {
-                frameImg.src = `assets/frames/webp/${post.frame}.webp`;
-                if (post.mat) {
-                  matDiv.style.top = `${post.mat.top}%`;
-                  matDiv.style.left = `${post.mat.left}%`;
-                  matDiv.style.width = `${post.mat.width}%`;
-                  matDiv.style.height = `${post.mat.height}%`;
-                } else {
-                  matDiv.style.inset = '12%';
-                }
-                item.aspect = post.aspectRatio;
-                wrapDiv.style.aspectRatio = String(item.aspect);
-              }
-
+              applyFrameToItem(item, index);
               requestAnimationFrame(() => {
                 frameImg.style.opacity = '1';
               });

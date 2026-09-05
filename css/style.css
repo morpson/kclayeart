@@ -787,9 +787,11 @@ body::before {
   }
 }
 
-/* .modern only applies its emphasis when the menu is actually visible */
+/* .modern and .mix only apply emphasis when the menu is actually visible */
 .right-menu-wrap.hovered .right-menu-item.modern,
-.site-header.menu-open .right-menu-item.modern {
+.right-menu-wrap.hovered .right-menu-item.mix,
+.site-header.menu-open .right-menu-item.modern,
+.site-header.menu-open .right-menu-item.mix {
   color: var(--text);
   font-weight: 700;
   opacity: 1;
@@ -797,8 +799,11 @@ body::before {
 
 @media (hover: hover) {
   .right-menu-wrap:hover .right-menu-item.modern,
+  .right-menu-wrap:hover .right-menu-item.mix,
   .site-header:has(#artist-name-wrap:hover) .right-menu-item.modern,
-  .site-header:has(#right-menu-wrap:hover) .right-menu-item.modern {
+  .site-header:has(#artist-name-wrap:hover) .right-menu-item.mix,
+  .site-header:has(#right-menu-wrap:hover) .right-menu-item.modern,
+  .site-header:has(#right-menu-wrap:hover) .right-menu-item.mix {
     color: var(--text);
     font-weight: 700;
     opacity: 1;
