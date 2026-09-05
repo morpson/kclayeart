@@ -1578,14 +1578,13 @@ textarea:focus-visible {
 
 /* ── Artwork Detail View Modal ── */
 .artwork-modal {
-
   position: fixed;
   inset: 0;
   z-index: 7500;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: clamp(16px, 3vw, 42px);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -1602,16 +1601,16 @@ textarea:focus-visible {
 .artwork-modal__backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(28px) saturate(160%);
-  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  background: rgba(250, 250, 250, 0.18);
+  backdrop-filter: blur(34px) saturate(170%);
+  -webkit-backdrop-filter: blur(34px) saturate(170%);
   transition: background 0.4s ease, backdrop-filter 0.4s ease;
 }
 
 [data-theme="dark"] .artwork-modal__backdrop {
-  background: rgba(18, 18, 22, 0.42);
-  backdrop-filter: blur(28px) saturate(150%);
-  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  background: rgba(18, 18, 22, 0.34);
+  backdrop-filter: blur(34px) saturate(150%);
+  -webkit-backdrop-filter: blur(34px) saturate(150%);
 }
 
 /* ── Background items fade away in full view ── */
@@ -1623,7 +1622,7 @@ body.artwork-view-active .site-footer {
 }
 
 body.artwork-view-active .gallery {
-  opacity: 0.1;
+  opacity: 0.16;
 }
 
 body.artwork-view-active .site-header,
@@ -1635,23 +1634,21 @@ body.artwork-view-active .site-footer {
   position: relative;
   z-index: 2;
   width: 100%;
-  max-width: 980px;
-  max-height: min(90vh, 860px);
+  max-width: 1240px;
+  max-height: min(94dvh, 920px);
   display: flex;
   flex-direction: column;
 }
 
 .artwork-modal__card {
   position: relative;
-  background: rgba(255, 255, 255, 0.52);
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.12),
-              0 2px 10px rgba(0, 0, 0, 0.04),
-              inset 0 1px 1px rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
-  backdrop-filter: blur(36px);
-  -webkit-backdrop-filter: blur(36px);
-  overflow: hidden;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   max-height: inherit;
@@ -1659,56 +1656,60 @@ body.artwork-view-active .site-footer {
 }
 
 [data-theme="dark"] .artwork-modal__card {
-  background: rgba(24, 24, 28, 0.60);
-  border-color: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 32px 84px rgba(0, 0, 0, 0.55),
-              0 2px 12px rgba(0, 0, 0, 0.3),
-              inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .artwork-modal__close {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 0;
+  right: 0;
   z-index: 20;
-  width: 36px;
-  height: 36px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: rgba(128, 128, 128, 0.12);
-  border: none;
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.72);
   color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.2s;
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+  transition: background-color 0.2s, transform 0.2s, border-color 0.2s;
 }
 
 .artwork-modal__close:hover {
-  background: rgba(128, 128, 128, 0.24);
+  background: rgba(255, 255, 255, 0.76);
   transform: scale(1.06);
 }
 
 .artwork-modal__content {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  overflow-y: auto;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  gap: clamp(20px, 3vw, 44px);
+  align-items: center;
+  overflow: visible;
   max-height: inherit;
 }
 
 .artwork-modal__image-pane {
-  padding: 40px 32px;
+  padding: clamp(12px, 2vw, 24px);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(128, 128, 128, 0.05);
-  min-height: 360px;
+  background: transparent;
+  min-height: min(74dvh, 680px);
 }
 
 .artwork-modal__frame-wrap {
   position: relative;
   width: 100%;
-  max-width: 440px;
+  max-width: min(62vw, 720px);
+  max-height: min(82dvh, 760px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1741,10 +1742,27 @@ body.artwork-view-active .site-footer {
 }
 
 .artwork-modal__info-pane {
-  padding: 40px 36px 36px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-self: center;
+  max-height: min(82dvh, 720px);
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: 18px;
+  backdrop-filter: blur(26px) saturate(165%);
+  -webkit-backdrop-filter: blur(26px) saturate(165%);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.10),
+              inset 0 1px 1px rgba(255, 255, 255, 0.72);
+}
+
+[data-theme="dark"] .artwork-modal__info-pane {
+  background: rgba(24, 24, 28, 0.48);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 28px 72px rgba(0, 0, 0, 0.45),
+              inset 0 1px 1px rgba(255, 255, 255, 0.12);
 }
 
 .artwork-modal__meta {
@@ -1936,45 +1954,44 @@ body.artwork-view-active .site-footer {
   }
 
   .artwork-modal {
-    padding: max(12px, env(safe-area-inset-top, 12px))
-             max(12px, env(safe-area-inset-right, 12px))
-             max(12px, env(safe-area-inset-bottom, 12px))
-             max(12px, env(safe-area-inset-left, 12px));
-    align-items: center;
+    padding: max(10px, env(safe-area-inset-top, 10px))
+             max(10px, env(safe-area-inset-right, 10px))
+             max(10px, env(safe-area-inset-bottom, 10px))
+             max(10px, env(safe-area-inset-left, 10px));
+    align-items: stretch;
   }
 
   .artwork-modal__container {
     width: 100%;
     height: 100%;
     max-width: 520px;
-    max-height: min(92dvh, calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 20px));
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 20px);
     min-height: 0;
     display: flex;
     flex-direction: column;
   }
 
   .artwork-modal__card {
-    border-radius: 18px;
     flex: 1 1 auto;
     height: 100%;
     min-height: 0;
     max-height: 100%;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .artwork-modal__close {
-    top: 12px;
-    right: 12px;
+    top: 4px;
+    right: 4px;
     z-index: 50;
     width: 38px;
     height: 38px;
-    background: rgba(128, 128, 128, 0.22);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.45);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.54);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.64);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   }
 
   [data-theme="dark"] .artwork-modal__close {
@@ -1997,21 +2014,21 @@ body.artwork-view-active .site-footer {
   .artwork-modal__image-pane {
     flex: 0 0 auto;
     width: 100%;
-    padding: 24px 16px 14px;
+    padding: 48px 10px 18px;
     min-height: 0;
-    max-height: 42dvh;
+    max-height: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(128, 128, 128, 0.04);
+    background: transparent;
   }
 
   .artwork-modal__frame-wrap {
     position: relative;
     width: auto;
-    height: 36dvh;
-    max-height: 320px;
-    max-width: 84vw;
+    height: min(58dvh, 520px);
+    max-height: 520px;
+    max-width: 92vw;
     margin: 0 auto;
   }
 
@@ -2024,10 +2041,25 @@ body.artwork-view-active .site-footer {
 
   .artwork-modal__info-pane {
     flex: 1 0 auto;
-    padding: 16px 18px 24px;
+    width: 100%;
+    padding: 18px 18px 20px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    max-height: none;
+    overflow: visible;
+    background: rgba(255, 255, 255, 0.38);
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    border-radius: 18px;
+    backdrop-filter: blur(24px) saturate(165%);
+    -webkit-backdrop-filter: blur(24px) saturate(165%);
+    box-shadow: 0 18px 52px rgba(0, 0, 0, 0.10),
+                inset 0 1px 1px rgba(255, 255, 255, 0.68);
+  }
+
+  [data-theme="dark"] .artwork-modal__info-pane {
+    background: rgba(24, 24, 28, 0.50);
+    border-color: rgba(255, 255, 255, 0.14);
   }
 
   .artwork-modal__title {
