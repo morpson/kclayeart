@@ -247,14 +247,40 @@
       const style = getComputedStyle(gallery);
       const pl = parseFloat(style.paddingLeft) || 0;
       const pr = parseFloat(style.paddingRight) || 0;
-      return gallery.offsetWidth - pl - pr;
+      return gallery.clientWidth - pl - pr;
     }
 
+    function prefersReducedMotion() {
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function isCoarsePointer() {
+      return window.matchMedia('(pointer: coarse)').matches;
+    }
+
+    function availableLayoutModes() {
+      const w = window.innerWidth;
+      if (w < 680) return ['1col', '2col'];
+      return ['1col', '2col', '3col'];
+    }
+
+    let layoutRunning = false;
+
     function layout(animate) {
+      if (!gallery || layoutRunning) return;
+
+      const modes = availableLayoutModes();
+      if (!modes.includes(layoutMode)) {
+        layoutMode = modes.includes(autoTier()) ? autoTier() : modes[0];
+      }
+
       const cols = colCount();
       const gap = getGap();
       const totalW = innerContentWidth();
       const cw = (totalW - gap * (cols - 1)) / cols;
+      if (!(totalW > 1) || !(cw > 1)) return;
+
+      layoutRunning = true;
 
       const lp = parseFloat(getComputedStyle(gallery).paddingLeft) || 0;
       const tp = parseFloat(getComputedStyle(gallery).paddingTop) || 0;
@@ -275,8 +301,9 @@
       });
 
       const totalH = `${Math.max(...heights) - gap + bp}px`;
+      const useMotion = animate && !prefersReducedMotion() && !isCoarsePointer();
 
-      if (animate) {
+      if (useMotion) {
         gallery.classList.remove('resizing');
         targets.forEach(({ link, cw, itemH, x, y }) => {
           link.style.width = `${cw}px`;
@@ -298,11 +325,13 @@
       }
 
       updateLayoutButtonText();
+      requestAnimationFrame(() => {
+        layoutRunning = false;
+      });
     }
 
     // --- Layout cycle button ---------------------------------------------
     const layoutCycleBtn = document.getElementById('layout-cycle-btn') || document.getElementById('sort-cycle-btn');
-    const LAYOUT_SEQUENCE = ['1col', '2col', '3col'];
 
     function updateLayoutButtonText() {
       if (!layoutCycleBtn) return;
@@ -313,25 +342,30 @@
     }
 
     function setLayout(mode, isManual = true) {
-      layoutMode = mode;
+      const modes = availableLayoutModes();
+      layoutMode = modes.includes(mode) ? mode : modes[0];
       if (isManual) {
         manualOverrideTier = autoTier();
-        localStorage.setItem('kc-layout', mode);
+        localStorage.setItem('kc-layout', layoutMode);
         localStorage.setItem('kc-layout-tier', manualOverrideTier);
       }
       layout(isManual);
     }
 
     if (layoutCycleBtn) {
-      layoutCycleBtn.addEventListener('click', () => {
-        const idx = LAYOUT_SEQUENCE.indexOf(layoutMode);
-        const next = LAYOUT_SEQUENCE[(idx + 1) % LAYOUT_SEQUENCE.length];
+      layoutCycleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const modes = availableLayoutModes();
+        const idx = Math.max(0, modes.indexOf(layoutMode));
+        const next = modes[(idx + 1) % modes.length];
         setLayout(next, true);
       });
     }
 
     let lastTier = autoTier();
+    let resizeCheckTimer = null;
     function checkAutoLayout() {
+      const modes = availableLayoutModes();
       const tier = autoTier();
       if (tier !== lastTier) {
         lastTier = tier;
@@ -339,12 +373,22 @@
         localStorage.removeItem('kc-layout');
         localStorage.removeItem('kc-layout-tier');
       }
+      if (!modes.includes(layoutMode)) {
+        setLayout(autoTier(), false);
+        return;
+      }
       if (!manualOverrideTier && layoutMode !== autoTier()) {
         setLayout(autoTier(), false);
       }
     }
 
-    window.addEventListener('resize', checkAutoLayout);
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeCheckTimer);
+      resizeCheckTimer = setTimeout(() => {
+        checkAutoLayout();
+        fitArtworkFrame();
+      }, 180);
+    });
     window.addEventListener('orientationchange', () => {
       setTimeout(checkAutoLayout, 150);
     });
@@ -380,19 +424,20 @@
     let resizeTimer = null;
 
     const ro = new ResizeObserver((entries) => {
+      if (layoutRunning) return;
       for (const entry of entries) {
         const currentWidth = entry.contentRect.width;
         if (prevWidth === 0) {
           prevWidth = currentWidth;
           return;
         }
-        if (Math.abs(currentWidth - prevWidth) > 3) {
+        if (Math.abs(currentWidth - prevWidth) > 8) {
           prevWidth = currentWidth;
           gallery.classList.add('resizing');
           clearTimeout(resizeTimer);
           resizeTimer = setTimeout(() => {
-            layout(false);
-          }, 60);
+            if (!layoutRunning) layout(false);
+          }, 120);
         }
       }
     });
@@ -426,16 +471,19 @@
     function closeBothMenus(delay = 0) {
       clearTimeout(menuLeaveTimer);
       cancelMenuAutoClose();
-      if (delay > 0) {
-        menuLeaveTimer = setTimeout(() => {
-          if (artistWrap) artistWrap.classList.remove('hovered');
-          if (rightWrap) rightWrap.classList.remove('hovered');
-          if (siteHeader) siteHeader.classList.remove('menu-open', 'menu-left-open', 'menu-right-open');
-        }, delay);
-      } else {
+      const applyClose = () => {
         if (artistWrap) artistWrap.classList.remove('hovered');
         if (rightWrap) rightWrap.classList.remove('hovered');
         if (siteHeader) siteHeader.classList.remove('menu-open', 'menu-left-open', 'menu-right-open');
+        if (document.activeElement && siteHeader && siteHeader.contains(document.activeElement) &&
+            typeof document.activeElement.blur === 'function') {
+          document.activeElement.blur();
+        }
+      };
+      if (delay > 0) {
+        menuLeaveTimer = setTimeout(applyClose, delay);
+      } else {
+        applyClose();
       }
     }
 
@@ -875,6 +923,29 @@
     let currentArtworkIndex = 0;
     let lastArtworkTrigger = null;
 
+    function fitArtworkFrame() {
+      if (!artworkModalFrameWrap || !artworkModal || !artworkModal.classList.contains('active')) return;
+      const pane = artworkModalFrameWrap.parentElement;
+      if (!pane) return;
+      const ar = parseFloat(artworkModalFrameWrap.style.getPropertyValue('--ar')) ||
+        parseFloat(String(artworkModalFrameWrap.style.aspectRatio)) || 1;
+      if (!(ar > 0)) return;
+      const paneStyle = getComputedStyle(pane);
+      const availW = Math.max(40, pane.clientWidth - (parseFloat(paneStyle.paddingLeft) || 0) - (parseFloat(paneStyle.paddingRight) || 0));
+      const isNarrow = window.matchMedia('(max-width: 768px)').matches;
+      const maxH = isNarrow
+        ? Math.min(window.innerHeight * 0.46, 420)
+        : Math.min(window.innerHeight * 0.82, 760);
+      let width = Math.min(availW, maxH * ar);
+      let height = width / ar;
+      if (height > maxH) {
+        height = maxH;
+        width = height * ar;
+      }
+      artworkModalFrameWrap.style.width = `${Math.round(width * 10) / 10}px`;
+      artworkModalFrameWrap.style.height = `${Math.round(height * 10) / 10}px`;
+    }
+
     function updateArtworkModalContent(index) {
       const post = sorted[index];
       if (!post) return;
@@ -918,7 +989,9 @@
       }
 
       if (artworkModalFrameWrap) {
-        artworkModalFrameWrap.style.aspectRatio = String(activeFrame.aspectRatio || post.aspectRatio || 1);
+        const ratio = Number(activeFrame.aspectRatio || post.aspectRatio || 1) || 1;
+        artworkModalFrameWrap.style.setProperty('--ar', String(ratio));
+        artworkModalFrameWrap.style.aspectRatio = String(ratio);
       }
 
       if (artworkModalMat && activeFrame.mat) {
@@ -935,6 +1008,8 @@
       if (artworkCounter) {
         artworkCounter.textContent = `${index + 1} of ${sorted.length}`;
       }
+
+      requestAnimationFrame(fitArtworkFrame);
     }
 
     function openArtworkModal(index) {
@@ -945,6 +1020,8 @@
       artworkModal.classList.add('active');
       artworkModal.setAttribute('aria-hidden', 'false');
       document.body.classList.add('modal-open', 'artwork-view-active');
+      requestAnimationFrame(() => requestAnimationFrame(fitArtworkFrame));
+      setTimeout(fitArtworkFrame, 80);
 
       if (artworkModalCloseBtn) {
         artworkModalCloseBtn.focus();
