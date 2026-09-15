@@ -1700,9 +1700,9 @@ textarea:focus-visible {
 
 .site-footer__credit-tooltip {
   position: absolute;
-  bottom: calc(100% + 8px);
+  top: calc(100% + 4px);
   left: 50%;
-  transform: translateX(-50%) translateY(4px);
+  transform: translateX(-50%) translateY(-4px);
   display: inline-flex;
   align-items: center;
   justify-content: center;
