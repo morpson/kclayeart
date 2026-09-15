@@ -1662,11 +1662,11 @@ textarea:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 6px;
+  margin-top: 14px;
   padding: 4px;
-  border-radius: 6px;
+  border-radius: 8px;
   text-decoration: none;
-  opacity: 0.35;
+  opacity: 0.75;
   transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1),
               transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   outline: none;
@@ -1675,8 +1675,8 @@ textarea:focus-visible {
 
 .site-footer__credit:hover,
 .site-footer__credit:focus-visible {
-  opacity: 0.92;
-  transform: translateY(-1px);
+  opacity: 1;
+  transform: translateY(-2px);
 }
 
 .site-footer__credit:focus-visible {
@@ -1685,17 +1685,17 @@ textarea:focus-visible {
 }
 
 .site-footer__credit-icon {
-  width: 22px;
+  width: 52px;
   height: auto;
   aspect-ratio: 836 / 902;
   display: block;
   object-fit: contain;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08));
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.12));
   transition: filter 0.25s ease;
 }
 
 [data-theme="dark"] .site-footer__credit-icon {
-  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.35)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.4));
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.45)) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
 }
 
 .site-footer__credit-tooltip {
