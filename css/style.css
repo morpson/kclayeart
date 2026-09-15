@@ -1657,6 +1657,92 @@ textarea:focus-visible {
   font-size: 0.8rem;
 }
 
+.site-footer__credit {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 6px;
+  padding: 4px;
+  border-radius: 6px;
+  text-decoration: none;
+  opacity: 0.35;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+  cursor: pointer;
+}
+
+.site-footer__credit:hover,
+.site-footer__credit:focus-visible {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.site-footer__credit:focus-visible {
+  outline: 2px solid var(--text-muted);
+  outline-offset: 3px;
+}
+
+.site-footer__credit-icon {
+  width: 22px;
+  height: auto;
+  aspect-ratio: 836 / 902;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.08));
+  transition: filter 0.25s ease;
+}
+
+[data-theme="dark"] .site-footer__credit-icon {
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.35)) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.4));
+}
+
+.site-footer__credit-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.22s ease;
+  user-select: none;
+  z-index: 20;
+}
+
+[data-theme="dark"] .site-footer__credit-tooltip {
+  background: rgba(28, 28, 32, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: var(--text);
+}
+
+.site-footer__credit:hover .site-footer__credit-tooltip,
+.site-footer__credit:focus-visible .site-footer__credit-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
 /* ── Artwork Detail View Modal ── */
 .artwork-modal {
   position: fixed;
