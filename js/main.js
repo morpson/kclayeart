@@ -1332,9 +1332,42 @@
 
     // --- Frame style toggle (Modern → Eclectic → Mix) --------------------
     const frameStyleToggle = document.getElementById('frame-style-toggle');
+    const frameStyleTooltip = document.getElementById('frame-style-tooltip');
     // Cycle order: modern → eclectic → mix
     const FRAME_STYLE_CYCLE = ['modern', 'eclectic', 'mix'];
+    const FRAME_STYLE_DISPLAY_NAMES = {
+      modern: 'modern',
+      eclectic: 'eclectic',
+      mix: 'mixed'
+    };
     let currentFrameStyle = 'modern';
+    let frameTooltipTimeout = null;
+
+    function showFrameStyleTooltip(style) {
+      if (!frameStyleTooltip) return;
+      const label = FRAME_STYLE_DISPLAY_NAMES[style] || style;
+      frameStyleTooltip.textContent = label;
+
+      if (frameStyleToggle) {
+        frameStyleToggle.classList.add('has-tooltip');
+      }
+
+      // Re-trigger animation cleanly even if clicked rapidly
+      frameStyleTooltip.classList.remove('visible');
+      void frameStyleTooltip.offsetWidth; // force reflow
+      frameStyleTooltip.classList.add('visible');
+
+      if (frameTooltipTimeout) {
+        clearTimeout(frameTooltipTimeout);
+      }
+
+      frameTooltipTimeout = setTimeout(() => {
+        frameStyleTooltip.classList.remove('visible');
+        if (frameStyleToggle) {
+          frameStyleToggle.classList.remove('has-tooltip');
+        }
+      }, 1800);
+    }
 
     // Per-item mix assignments: true = use modern frame, false = use eclectic.
     // Regenerated each time mix mode is entered.
@@ -1390,10 +1423,11 @@
 
     function updateFrameToggleButton() {
       if (!frameStyleToggle) return;
+      const displayStyle = FRAME_STYLE_DISPLAY_NAMES[currentFrameStyle] || currentFrameStyle;
       frameStyleToggle.classList.toggle('modern', currentFrameStyle === 'modern');
       frameStyleToggle.classList.toggle('mix', currentFrameStyle === 'mix');
       frameStyleToggle.setAttribute('aria-pressed', currentFrameStyle !== 'eclectic' ? 'true' : 'false');
-      frameStyleToggle.setAttribute('aria-label', `Cycle frame style: currently ${currentFrameStyle}`);
+      frameStyleToggle.setAttribute('aria-label', `Cycle frame style: currently ${displayStyle}`);
     }
 
     // Apply initial style (modern) on load — no animation needed
@@ -1410,6 +1444,7 @@
         }
 
         updateFrameToggleButton();
+        showFrameStyleTooltip(currentFrameStyle);
 
         items.forEach((item, index) => {
           const staggerDelay = index * 35;
